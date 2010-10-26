@@ -118,6 +118,8 @@ public enum FrameIdentifier
 			{
 				model.addStatement(resource, NIE.mimeType, apic.getMimeType());
 			}
+			// FIXME: cover art can be item specific (as it is currently the
+			// case)
 			model.addStatement(result.getDescribedUri(), MO.image, resource);
 		}
 	},
@@ -127,6 +129,7 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
 			String description = ((FrameBodyCOMM) body).getDescription();
+			Model model = result.getModel();
 			boolean addDescription = (description != null && description
 					.length() > 0);
 			String text = ((FrameBodyCOMM) body).getText();
@@ -134,7 +137,8 @@ public enum FrameIdentifier
 			String resultString = (addDescription ? description : "")
 					+ (addDescription && addText ? "\n" : "")
 					+ (addText ? text : "");
-			result.add(DC.description, resultString);
+			model.addStatement(track, DC.description, ModelUtil.createLiteral(
+					model, resultString));
 			id3v1props.remove(DC.description);
 		}
 	},
@@ -196,8 +200,7 @@ public enum FrameIdentifier
 							.intValue()));
 			model.addStatement(playcounter, DC.title, ModelUtil.createLiteral(
 					model, "ID3 Play counter"));
-			model.addStatement(playcounter, PBO.media_object, result
-					.getDescribedUri());
+			model.addStatement(playcounter, PBO.media_object, track);
 		}
 	}, // acts as general play counter
 	POPM("Popularimeter", true)
@@ -220,6 +223,8 @@ public enum FrameIdentifier
 			model.addStatement(person, RDF.type, FOAF.Person);
 			model.addStatement(person, FOAF.mbox, new URIImpl("mailto:"
 					+ popularimeterFB.getEmailToUser()));
+
+			// popularimeter is currently related with the item
 			model.addStatement(popularimeter, PBO.media_object, result
 					.getDescribedUri());
 		}
@@ -248,7 +253,7 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 			if (!model.contains(ModelUtil.createStatement(model, musicAlbum,
-					MO.track, result.getDescribedUri())))
+					MO.track, track)))
 			{
 				model.addStatement(musicAlbum, MO.track, result
 						.getDescribedUri());
@@ -285,11 +290,19 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 
+			if (!model.contains(ModelUtil.createStatement(model, result
+					.getDescribedUri(), MO.encodes, signal)))
+			{
+				model
+						.addStatement(result.getDescribedUri(), MO.encodes,
+								signal);
+				model.addStatement(signal, RDF.type, MO.Signal);
+			}
+
 			// should be an integer stored as string and now transformed to a
 			// float value
-			model.addStatement(result.getDescribedUri(), MO.bpm, ModelUtil
-					.createLiteral(model, Float.valueOf(
-							bpmFB.getFirstTextValue()).floatValue()));
+			model.addStatement(signal, MO.bpm, ModelUtil.createLiteral(model,
+					Float.valueOf(bpmFB.getFirstTextValue()).floatValue()));
 		}
 	},
 	TCOM("Composer", true)
@@ -302,6 +315,7 @@ public enum FrameIdentifier
 
 			// I use here currently frbr:subject, maybe a proper (inverse)
 			// relation, e.g. mo:musical_work, might be better
+			// FIXME: currently it is a work to item relation
 			if (!model.contains(ModelUtil.createStatement(model, musicalWork,
 					FRBR.subject, result.getDescribedUri())))
 			{
@@ -348,8 +362,10 @@ public enum FrameIdentifier
 						GenreUri genreUri = GenreUri.getGenreByIntId(intValue);
 						if (genreUri != null)
 						{
-							model.addStatement(result.getDescribedUri(),
-									MO.genre, genreUri.getUri());
+							// FIXME: a music genre can also be item specific
+							// (subjective, personal)
+							model.addStatement(track, MO.genre, genreUri
+									.getUri());
 							ok = true;
 						}
 					}
@@ -369,9 +385,10 @@ public enum FrameIdentifier
 				// introduce a new URI for a new music genre
 				// TODO: write a proper music genre instantiation (with
 				// duplicate check etc)
-				model.addStatement(result.getDescribedUri(), MO.genre,
-						new URIImpl(Namespaces.PMKB_NS + GenreUri.GENRE_RURI
-								+ value));
+				// a music genre can also be item specific (subjective,
+				// personal)
+				model.addStatement(track, MO.genre, new URIImpl(
+						Namespaces.PMKB_NS + GenreUri.GENRE_RURI + value));
 			}
 			id3v1props.remove(NID3.contentType);
 		}
@@ -393,11 +410,10 @@ public enum FrameIdentifier
 			FrameBodyTEXT lyricistFB = (FrameBodyTEXT) body;
 			Model model = result.getModel();
 
-			if (!model.contains(ModelUtil.createStatement(model, result
-					.getDescribedUri(), MO.publication_of, lyrics)))
+			if (!model.contains(ModelUtil.createStatement(model, track,
+					MO.publication_of, lyrics)))
 			{
-				model.addStatement(result.getDescribedUri(), MO.publication_of,
-						lyrics);
+				model.addStatement(track, MO.publication_of, lyrics);
 				model.addStatement(lyrics, RDF.type, MO.Lyrics);
 			}
 
@@ -423,26 +439,37 @@ public enum FrameIdentifier
 			Model model = result.getModel();
 			FrameBodyTIT2 titleFB = (FrameBodyTIT2) body;
 
+			// FIXME: a title can also be item specific (subjective, personal)
+			// -> this is currently the case
 			model.addStatement(result.getDescribedUri(), DC.title, ModelUtil
 					.createLiteral(model, titleFB.getFirstTextValue()));
 			id3v1props.remove(DC.title);
 		}
 	},
 	TIT3("Subtitle/Description refinement", false), // the content of this frame
-													// is very ambiguous; FIXME:
-													// currently not supported
-													// by PMKB
+	// is very ambiguous; FIXME:
+	// currently not supported
+	// by PMKB
 	TKEY("Initial key", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
 			FrameBodyTKEY keyFB = (FrameBodyTKEY) body;
-			if(keyFB.isValid())
+			if (keyFB.isValid())
 			{
 				Model model = result.getModel();
-				
-				
+
+				if (!model.contains(ModelUtil.createStatement(model, result
+						.getDescribedUri(), MO.encodes, signal)))
+				{
+					model.addStatement(result.getDescribedUri(), MO.encodes,
+							signal);
+					model.addStatement(signal, RDF.type, MO.Signal);
+				}
+
+				model.addStatement(signal, MO.key, KeyUri.getKeyByStringId(
+						keyFB.getFirstTextValue()).getUri());
 			}
 		}
 	},
@@ -955,7 +982,9 @@ public enum FrameIdentifier
 
 	private String name;
 	private boolean isSupported;
+	private static Resource track;
 	private static Resource musicAlbum;
+	private static Resource signal;
 	private static Resource musicalWork;
 	private static Resource lyrics;
 
@@ -975,6 +1004,16 @@ public enum FrameIdentifier
 		return isSupported;
 	}
 
+	public Resource getTrack()
+	{
+		return track;
+	}
+
+	public void setTrack(Resource t)
+	{
+		track = t;
+	}
+
 	public Resource getMusicAlbum()
 	{
 		return musicAlbum;
@@ -983,6 +1022,16 @@ public enum FrameIdentifier
 	public void setMusicAlbum(Resource mA)
 	{
 		musicAlbum = mA;
+	}
+
+	public Resource getSignal()
+	{
+		return signal;
+	}
+
+	public void setSignal(Resource s)
+	{
+		signal = s;
 	}
 
 	public Resource getMusicalWork()
