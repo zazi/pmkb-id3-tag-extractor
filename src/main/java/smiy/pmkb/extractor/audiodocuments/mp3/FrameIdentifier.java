@@ -13,10 +13,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
+import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyAPIC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyCOMM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyGEOB;
@@ -91,6 +93,7 @@ import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.FRBR;
 import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.PBO;
+import smiy.pmkb.vocabulary.TL;
 
 /**
  * An enumeration of ID3v2 frames defined in the standards.
@@ -290,14 +293,7 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 
-			if (!model.contains(ModelUtil.createStatement(model, result
-					.getDescribedUri(), MO.encodes, signal)))
-			{
-				model
-						.addStatement(result.getDescribedUri(), MO.encodes,
-								signal);
-				model.addStatement(signal, RDF.type, MO.Signal);
-			}
+			checkSignal(model, result);
 
 			// should be an integer stored as string and now transformed to a
 			// float value
@@ -410,12 +406,7 @@ public enum FrameIdentifier
 			FrameBodyTEXT lyricistFB = (FrameBodyTEXT) body;
 			Model model = result.getModel();
 
-			if (!model.contains(ModelUtil.createStatement(model, track,
-					MO.publication_of, lyrics)))
-			{
-				model.addStatement(track, MO.publication_of, lyrics);
-				model.addStatement(lyrics, RDF.type, MO.Lyrics);
-			}
+			checkLyrics(model, result);
 
 			Resource lyricist = ModelUtil.generateRandomResource(model);
 			model.addStatement(lyrics, DCTERMS.creator, lyricist);
@@ -460,13 +451,7 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				if (!model.contains(ModelUtil.createStatement(model, result
-						.getDescribedUri(), MO.encodes, signal)))
-				{
-					model.addStatement(result.getDescribedUri(), MO.encodes,
-							signal);
-					model.addStatement(signal, RDF.type, MO.Signal);
-				}
+				checkSignal(model, result);
 
 				model.addStatement(signal, MO.key, KeyUri.getKeyByStringId(
 						keyFB.getFirstTextValue()).getUri());
@@ -478,8 +463,19 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			result.add(NID3.language, ((FrameBodyTLAN) body)
-					.getFirstTextValue());
+			FrameBodyTLAN languageFB = (FrameBodyTLAN) body;
+			if (languageFB.isValid())
+			{
+				Model model = result.getModel();
+
+				checkLyrics(model, result);
+
+				// TODO: we have to store the ISO-639-2 based language tag(s) as
+				// language tag of the lyrics string; that means, we first need
+				// the lyrics to append the language tag; ISO-639-2 should be a
+				// part of IETF BCP 47
+				lyricsLanguage = languageFB.getFirstTextValue();
+			}
 		}
 	},
 	TLEN("Length", true)
@@ -487,7 +483,19 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			result.add(NID3.length, ((FrameBodyTLEN) body).getFirstTextValue());
+			FrameBodyTLEN lengthFB = (FrameBodyTLEN) body;
+
+			Model model = result.getModel();
+
+			checkSignal(model, result);
+
+			Resource timeInterval = ModelUtil.generateRandomResource(model);
+			model.addStatement(timeInterval, RDF.type,
+					smiy.pmkb.vocabulary.TIME.Interval);
+			model.addStatement(timeInterval, TL.durationInt, ModelUtil
+					.createLiteral(model, Integer.parseInt(lengthFB
+							.getFirstTextValue())));
+			model.addStatement(signal, MO.time, timeInterval);
 		}
 	},
 	TMED("Media type", true)
@@ -495,17 +503,34 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			result.add(NID3.mediaType, ((FrameBodyTMED) body)
-					.getFirstTextValue());
+			if (getMediaType((AbstractFrameBodyTextInfo) body) != null)
+			{
+				Model model = result.getModel();
+
+				checkSignal(model, result);
+				checkOriginalSignal(model, result);
+				checkOriginalMusicalManifestation(model, result);
+
+				model.addStatement(originalMusicalManifestation, MO.media_type,
+						getMediaType((AbstractFrameBodyTextInfo) body));
+			}
 		}
-	},
+	}, // describes from which media the sound originated
 	TOAL("Original album/movie/show title", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			result.add(NID3.originalAlbumTitle, ((FrameBodyTOAL) body)
-					.getFirstTextValue());
+			Model model = result.getModel();
+			FrameBodyTOAL originalTitleFB = (FrameBodyTOAL) body;
+
+			checkSignal(model, result);
+			checkOriginalSignal(model, result);
+			checkOriginalMusicalManifestation(model, result);
+
+			model.addStatement(originalMusicalManifestation, DC.title,
+					ModelUtil.createLiteral(model, originalTitleFB
+							.getFirstTextValue()));
 		}
 	},
 	TOFN("Original filename", true)
@@ -516,14 +541,29 @@ public enum FrameIdentifier
 			result.add(NID3.originalFilename, ((FrameBodyTOFN) body)
 					.getFirstTextValue());
 		}
-	},
+	}, // contains the preferred filename for the file, since some media doesn't
+	// allow the desired length of the filename; FIXME: this statement uses
+	// currently a NID3 term
 	TOLY("Original lyricist(s)/text writer(s)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			addSimpleContact(NID3.originalTextWriter, ((FrameBodyTOLY) body)
-					.getFirstTextValue(), result);
+			FrameBodyTOLY originalLyricistFB = (FrameBodyTOLY) body;
+			Model model = result.getModel();
+
+			checkSignal(model, result);
+			checkOriginalSignal(model, result);
+			checkOriginalMusicalManifestation(model, result);
+			checkOriginalLyrics(model, result);
+
+			Resource originalLyricist = ModelUtil.generateRandomResource(model);
+			model.addStatement(originalLyrics, DCTERMS.creator,
+					originalLyricist);
+			model.addStatement(originalLyricist, RDF.type, FOAF.Person);
+			model.addStatement(originalLyricist, FOAF.name, ModelUtil
+					.createLiteral(model, originalLyricistFB
+							.getFirstTextValue()));
 		}
 	},
 	TOPE("Original artist(s)/performer(s)", true)
@@ -531,8 +571,16 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			addSimpleContact(NID3.originalArtist, ((FrameBodyTOPE) body)
-					.getFirstTextValue(), result);
+			FrameBodyTOPE originalArtistFB = (FrameBodyTOPE) body;
+			Model model = result.getModel();
+
+			checkSignal(model, result);
+			checkOriginalSignal(model, result);
+
+			// FIXME: handle multiple artists performers ("/" separated)
+			Resource originalArtist = ModelUtil.generateRandomResource(model);
+			model.addStatement(originalSignal, DC.creator, originalArtist);
+			model.addStatement(originalArtist, RDF.type, MO.MusicArtist);
 		}
 	},
 	TOWN("File owner/licensee", true)
@@ -540,8 +588,13 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			addSimpleContact(NID3.fileOwner, ((FrameBodyTOWN) body)
-					.getFirstTextValue(), result);
+			FrameBodyTOWN ownerFB = (FrameBodyTOWN) body;
+			Model model = result.getModel();
+
+			Resource owner = ModelUtil.generateRandomResource(model);
+			// frbr:owner (on item level (?))
+			model.addStatement(result.getDescribedUri(), FRBR.owner, owner);
+			model.addStatement(owner, RDF.type, FOAF.Person);
 		}
 	},
 	TPE1("Lead performer(s)/Soloist(s)", true)
@@ -987,6 +1040,10 @@ public enum FrameIdentifier
 	private static Resource signal;
 	private static Resource musicalWork;
 	private static Resource lyrics;
+	private static String lyricsLanguage;
+	private static Resource originalSignal;
+	private static Resource originalMusicalManifestation;
+	private static Resource originalLyrics;
 
 	FrameIdentifier(String name, boolean isSupported)
 	{
@@ -1052,6 +1109,46 @@ public enum FrameIdentifier
 	public void setLyrics(Resource l)
 	{
 		lyrics = l;
+	}
+
+	public String getLyricsLanguage()
+	{
+		return lyricsLanguage;
+	}
+
+	public void setLyricsLanguage(String ll)
+	{
+		lyricsLanguage = ll;
+	}
+
+	public Resource getOriginalSignal()
+	{
+		return originalSignal;
+	}
+
+	public void setOriginalSignal(Resource os)
+	{
+		originalSignal = os;
+	}
+
+	public Resource getOriginalMusicalManifestation()
+	{
+		return originalMusicalManifestation;
+	}
+
+	public void setOriginalMusicalManifestation(Resource om)
+	{
+		originalMusicalManifestation = om;
+	}
+
+	public Resource getOriginalLyrics()
+	{
+		return originalLyrics;
+	}
+
+	public void setOriginalLyrics(Resource ol)
+	{
+		originalLyrics = ol;
 	}
 
 	public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
@@ -1123,5 +1220,125 @@ public enum FrameIdentifier
 		result.set(Calendar.SECOND, Integer
 				.parseInt(timestamp.substring(17, 2)));
 		return result.getTime();
+	}
+
+	/**
+	 * Tries to resolve an ID3 tag media type description to an URI.
+	 * 
+	 * TODO: add exceptions, especially NullPointerException
+	 * 
+	 * @param body
+	 *            - the frame that contains a media type description
+	 * @return - the URI of the specific media type
+	 */
+	protected URI getMediaType(AbstractFrameBodyTextInfo body)
+	{
+		String mediaType = body.getFirstTextValue();
+		String mediaTypeShortened = "";
+
+		if (mediaType.length() > 3)
+		{
+			mediaTypeShortened = mediaType.substring(0, 2);
+		}
+		else
+		{
+			mediaTypeShortened = mediaType;
+		}
+
+		if (MediaTypeUri.getKeyByStringId(mediaTypeShortened) != null)
+		{
+			MediaTypeUri mediaTypeUri = MediaTypeUri
+					.getKeyByStringId(mediaTypeShortened);
+
+			// handle specific video media types (VHS, S-VHS, Betamax)
+			if (mediaTypeUri == MediaTypeUri.VID)
+			{
+				String mediaTypeShortenedEnd = mediaType.substring(mediaType
+						.length() - 3, mediaType.length() - 1);
+
+				if (MediaTypeUri.getKeyByStringId(mediaTypeShortenedEnd) != null)
+				{
+					return MediaTypeUri.getKeyByStringId(mediaTypeShortenedEnd)
+							.getUri();
+				}
+			}
+			else
+			{
+				return mediaTypeUri.getUri();
+			}
+		}
+		// handle specific other analogue media types
+		else if (mediaTypeShortened.equals("ANA"))
+		{
+			if (mediaType.length() >= 7)
+			{
+				mediaTypeShortened = mediaType.substring(0, 6);
+
+				if (MediaTypeUri.getKeyByStringId(mediaTypeShortened) != null)
+				{
+					return MediaTypeUri.getKeyByStringId(mediaTypeShortened)
+							.getUri();
+				}
+			}
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	protected void checkSignal(Model model, RDFContainer result)
+	{
+		if (!model.contains(ModelUtil.createStatement(model, result
+				.getDescribedUri(), MO.encodes, signal)))
+		{
+			model.addStatement(result.getDescribedUri(), MO.encodes, signal);
+			model.addStatement(signal, RDF.type, MO.Signal);
+		}
+	}
+
+	protected void checkLyrics(Model model, RDFContainer result)
+	{
+		if (!model.contains(ModelUtil.createStatement(model, track,
+				MO.publication_of, lyrics)))
+		{
+			model.addStatement(track, MO.publication_of, lyrics);
+			model.addStatement(lyrics, RDF.type, MO.Lyrics);
+		}
+	}
+
+	protected void checkOriginalSignal(Model model, RDFContainer result)
+	{
+		if (!model.contains(ModelUtil.createStatement(model, signal,
+				MO.derived_from, originalSignal)))
+		{
+			model.addStatement(signal, MO.derived_from, originalSignal);
+			model.addStatement(originalSignal, RDF.type, MO.Signal);
+		}
+	}
+
+	protected void checkOriginalMusicalManifestation(Model model,
+			RDFContainer result)
+	{
+		if (!model.contains(ModelUtil.createStatement(model, originalSignal,
+				FRBR.embodiment, originalMusicalManifestation)))
+		{
+			model.addStatement(originalSignal, FRBR.embodiment,
+					originalMusicalManifestation);
+			model.addStatement(originalMusicalManifestation, RDF.type,
+					MO.MusicalManifestation);
+		}
+	}
+
+	protected void checkOriginalLyrics(Model model, RDFContainer result)
+	{
+		if (!model.contains(ModelUtil
+				.createStatement(model, originalMusicalManifestation,
+						MO.publication_of, originalLyrics)))
+		{
+			model.addStatement(originalMusicalManifestation, MO.publication_of,
+					originalLyrics);
+			model.addStatement(originalLyrics, RDF.type, MO.Lyrics);
+		}
 	}
 }

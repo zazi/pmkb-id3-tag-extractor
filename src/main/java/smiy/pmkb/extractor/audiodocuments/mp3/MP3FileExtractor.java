@@ -210,6 +210,9 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource signal = ModelUtil.generateRandomResource(model);
 		Resource musicalWork = ModelUtil.generateRandomResource(model);
 		Resource lyrics = ModelUtil.generateRandomResource(model);
+		Resource originalSignal = ModelUtil.generateRandomResource(model);
+		Resource originalMusicalManifestation = ModelUtil.generateRandomResource(model);
+		Resource originalLyrics = ModelUtil.generateRandomResource(model);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
@@ -228,6 +231,9 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				frameIdentifier.setSignal(signal);
 				frameIdentifier.setMusicalWork(musicalWork);
 				frameIdentifier.setLyrics(lyrics);
+				frameIdentifier.setOriginalSignal(originalSignal);
+				frameIdentifier.setOriginalMusicalManifestation(originalMusicalManifestation);
+				frameIdentifier.setOriginalLyrics(originalLyrics);
 				frameIdentifier.process(body, id3v2, id3v1FieldHashMap, result);
 			}
 			catch (Exception e)

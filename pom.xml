@@ -122,6 +122,13 @@
 						<outputDir>${vocabulary.output.dir}</outputDir>
 						<namespaceStrict>true</namespaceStrict>
 					</vocabulary>
+					<vocabulary>
+						<ontology>${vocabulary.input.dir}/mediatypes.rdf</ontology>
+						<namespace>http://purl.org/ontology/mt/</namespace>
+						<javaClass>${vocabulary.java.package}.MT</javaClass>
+						<outputDir>${vocabulary.output.dir}</outputDir>
+						<namespaceStrict>true</namespaceStrict>
+					</vocabulary>
   				</vocabularies>
   			</configuration>
   			<executions>
