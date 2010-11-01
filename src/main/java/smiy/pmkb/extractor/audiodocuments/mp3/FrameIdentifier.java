@@ -89,6 +89,7 @@ import smiy.pmkb.util.Namespaces;
 import smiy.pmkb.vocabulary.CO;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
+import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.FRBR;
 import smiy.pmkb.vocabulary.MO;
@@ -96,6 +97,7 @@ import smiy.pmkb.vocabulary.MT;
 import smiy.pmkb.vocabulary.PBO;
 import smiy.pmkb.vocabulary.PO;
 import smiy.pmkb.vocabulary.TL;
+import smiy.pmkb.vocabulary.WGS84;
 
 /**
  * An enumeration of ID3v2 frames defined in the standards.
@@ -816,21 +818,23 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.internationalStandardRecordingCode,
-					((FrameBodyTSRC) body).getFirstTextValue());
+			FrameBodyTSRC isrcFB = (FrameBodyTSRC) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+
+			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.isrc,
+					ModelUtil.createLiteral(model, isrcFB.getFirstTextValue()));
 		}
 	},
-	TSSE("Software/Hardware and settings used for encoding", true)
-	{
-		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result,
-				HashMap<String, Resource> resourceMap)
-		{
-			result.add(NID3.encodingSettings, ((FrameBodyTSSE) body)
-					.getFirstTextValue());
-		}
-	},
-	TXXX("User defined text information frame", false)
+	TSSE("Software/Hardware and settings used for encoding", false), // FIXME:
+	// currently
+	// not
+	// supported
+	// by
+	// PMKB
+	TXXX("User defined text information frame", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result,
@@ -838,15 +842,169 @@ public enum FrameIdentifier
 		{
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
 			String description = txxx.getDescription();
-			String text = txxx.getText();
 			Model model = result.getModel();
-			Resource resource = ModelUtil.generateRandomResource(model);
-			model.addStatement(resource, RDF.type, NID3.UserDefinedFrame);
-			model.addStatement(resource, NID3.userDefinedFrameDescription,
-					description);
-			model.addStatement(resource, NID3.userDefinedFrameValue, text);
-			model.addStatement(result.getDescribedUri(), NID3.userDefinedFrame,
-					resource);
+
+			// let's handle some predefined descriptors
+			// FIXME: apply a probably more elegant mechanism here, e.g. method
+			// invocation (valueOf enum wouldn't work here)
+			if (description.equals(FrameBodyTXXX.AMAZON_ASIN))
+			{
+				// this should related to its Amazon ASIN page (?)
+				// let's take the track for the moment ;)
+				model.addStatement(resourceMap.get(ID3Util.TRACK),
+						MO.amazon_asin, txxx.getFirstTextValue());
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.BARCODE))
+			{
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+						.get(ID3Util.TRACK), MO.Record);
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.RELEASE), MO.record, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.Release);
+
+				// since we don't of which type (e.g. EAN or UPC) the barcode
+				// is, we use the general property for it
+				model
+						.addStatement(resourceMap.get(ID3Util.RELEASE),
+								MO.gtin, ModelUtil.createLiteral(model, txxx
+										.getFirstTextValue()));
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.CATALOG_NO))
+			{
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+						.get(ID3Util.TRACK), MO.Record);
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.RELEASE), MO.record, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.Release);
+
+				model.addStatement(resourceMap.get(ID3Util.RELEASE),
+						MO.catalogue_number, ModelUtil.createLiteral(model,
+								txxx.getFirstTextValue()));
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MOOD))
+			{
+
+				continue;
+			}
+			else if (description
+					.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_ARTISTID))
+			{
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+						.get(ID3Util.TRACK), MO.Record);
+				ID3Util.checkStatementObject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), DCTERMS.creator, resourceMap
+						.get(ID3Util.ALBUMARTIST), MO.MusicArtist);
+
+				// add MB GUID as string
+				model.addStatement(resourceMap.get(ID3Util.ALBUMARTIST),
+						MO.musicbrainz_guid, ModelUtil.createLiteral(model,
+								txxx.getFirstTextValue()));
+
+				continue;
+			}
+			else if (description
+					.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_COUNTRY))
+			{
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+						.get(ID3Util.TRACK), MO.Record);
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.RELEASE), MO.record, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.Release);
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
+						.get(ID3Util.RELEASE), MO.ReleaseEvent);
+
+				// add country name
+				Resource country = ModelUtil.generateRandomResource(model);
+				model.addStatement(resourceMap.get(ID3Util.RELEASEEVENT),
+						EVENT.place, country);
+				model.addStatement(country, RDF.type, WGS84.SpatialThing);
+				model.addStatement(country, DC.title, ModelUtil.createLiteral(
+						model, txxx.getFirstTextValue()));
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_STATUS))
+			{
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+						.get(ID3Util.TRACK), MO.Record);
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.RELEASE), MO.record, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.Release);
+
+				model.addStatement(resourceMap.get(ID3Util.RELEASE),
+						MO.release_status, ReleaseStatusUri.getKeyByStringId(
+								txxx.getFirstTextValue()).getUri());
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_TYPE))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUMID))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_DISCID))
+			{
+
+				continue;
+			}
+			else if (description
+					.equals(FrameBodyTXXX.MUSICBRAINZ_RELEASE_GROUPID))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_WORKID))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.MUSICIP_ID))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.PERFORMER))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.SCRIPT))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.TAGS))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.ALBUM_ARTIST))
+			{
+
+				continue;
+			}
+			else if (description.equals(FrameBodyTXXX.FBPM))
+			{
+
+				continue;
+			}
 		}
 	},
 	UFID("Unique file identifier", true)

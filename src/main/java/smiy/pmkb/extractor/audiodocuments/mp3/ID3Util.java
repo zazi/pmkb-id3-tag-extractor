@@ -57,6 +57,7 @@ public class ID3Util
 	public static final String BROADCAST = "broadcast";
 	public static final String OUTLET = "outlet";
 	public static final String SERVICE = "service";
+	public static final String ALBUMARTIST = "albumArtist";
 
 	/**
 	 * As taken from the timestamp definition published at <br/>
@@ -145,11 +146,12 @@ public class ID3Util
 		}
 	}
 
-	public static void checkArtist(Model model, String value, Resource track)
+	public static void checkArtist(Model model, String value, Resource subject)
 	{
-		// creates here a random URI for further processing (matching
-		// task)
-		ID3Util.addAgent(model, track, DCTERMS.creator, MO.MusicArtist, value);
+		ID3Util
+				.addAgent(model, subject, DCTERMS.creator, MO.MusicArtist,
+						value);
+
 	}
 
 	/**

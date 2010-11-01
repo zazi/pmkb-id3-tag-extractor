@@ -229,6 +229,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource broadcast = ModelUtil.generateRandomResource(model);
 		Resource outlet = ModelUtil.generateRandomResource(model);
 		Resource service = ModelUtil.generateRandomResource(model);
+		Resource albumArtist = ModelUtil.generateRandomResource(model);
 
 		resourceMap.put(ID3Util.SIGNAL, signal);
 		resourceMap.put(ID3Util.MUSICALWORK, musicalWork);
@@ -246,6 +247,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		resourceMap.put(ID3Util.BROADCAST, broadcast);
 		resourceMap.put(ID3Util.OUTLET, outlet);
 		resourceMap.put(ID3Util.SERVICE, service);
+		resourceMap.put(ID3Util.ALBUMARTIST, albumArtist);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
