@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:dcterms="http://purl.org/dc/terms/"
+   xmlns:event="http://purl.org/NET/c4dm/event.owl#"
+   xmlns:foaf="http://xmlns.com/foaf/0.1/"
+   xmlns:frbr="http://purl.org/vocab/frbr/core#"
+   xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+   xmlns:mo="http://purl.org/ontology/mo/"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+   xmlns:tags="http://www.holygoat.co.uk/owl/redwood/0.1/tags/"
+   xmlns:tl="http://purl.org/NET/c4dm/timeline.owl#"
+   xmlns:vs="http://www.w3.org/2003/06/sw-vocab-status/ns#"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+   xmlns="http://purl.org/ontology/po/" xml:base="http://purl.org/ontology/po/">
+  <owl:Ontology rdf:about="">
+    <dc:contributor rdf:resource="http://metade.org/foaf.rdf#me"/>
+    <dc:contributor rdf:resource="http://www.aelius.com/njh#me"/>
+    <dc:creator rdf:resource="http://moustaki.org/foaf.rdf#moustaki"/>
+    <dc:date>$Date: 2009/02/20 16:00:00 $</dc:date>
+    <rdfs:comment>
+		A vocabulary for programme data.
+		It defines concepts such as brands, series, episodes, broadcasts, etc.
+	</rdfs:comment>
+    <rdfs:label>Programmes ontology</rdfs:label>
+    <owl:imports rdf:resource="../../NET/c4dm/event.owl"/>
+    <owl:imports rdf:resource="../../NET/c4dm/timeline.owl"/>
+  </owl:Ontology>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2003/06/sw-vocab-status/ns#term_status"/>
+  <owl:Class rdf:about="Programme">
+    <rdfs:comment>
+		A programme, can either be a brand, a series or an episode
+	</rdfs:comment>
+    <rdfs:label>programme</rdfs:label>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Brand">
+    <rdfs:comment>
+		A brand, e.g. `Top Gear'
+	</rdfs:comment>
+    <rdfs:label>brand</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Programme"/>
+    <owl:disjointWith rdf:resource="Clip"/>
+    <owl:disjointWith rdf:resource="Episode"/>
+    <owl:disjointWith rdf:resource="Series"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="ProgrammeItem">
+    <rdfs:comment>
+        A programme that can have versions, and as such can be broadcast or made available on-demand, e.g. a clip or an episode.
+    </rdfs:comment>
+    <rdfs:label>programme item</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Programme"/>
+    <owl:disjointWith rdf:resource="Brand"/>
+    <owl:disjointWith rdf:resource="Series"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Episode">
+    <rdfs:comment>
+		A particular episode, e.g. `Top Gear, first episode of the first series' or the film 'A Walk in the Sun' (http://www.bbc.co.uk/programmes/b00gfzdt)
+	</rdfs:comment>
+    <rdfs:label>episode</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Programme"/>
+    <rdfs:subClassOf rdf:resource="ProgrammeItem"/>
+    <owl:disjointWith rdf:resource="Brand"/>
+    <owl:disjointWith rdf:resource="Series"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Clip">
+    <rdfs:comment>
+        A particular clip, e.g. `Clip of Top Gear, first series'
+    </rdfs:comment>
+    <rdfs:label>clip</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Programme"/>
+    <rdfs:subClassOf rdf:resource="ProgrammeItem"/>
+    <owl:disjointWith rdf:resource="Brand"/>
+    <owl:disjointWith rdf:resource="Series"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Series">
+    <rdfs:comment>
+		A series, e.g. `Top Gear, first season'
+	</rdfs:comment>
+    <rdfs:label>series</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Programme"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Category">
+    <rdfs:comment>
+        A category provides a way of classifying a set of programmes. Such classifications
+        can be performed according to multiple dimensions and taxonomies, e.g. genre, format, places, people, subjects...
+    </rdfs:comment>
+    <rdfs:label>category</rdfs:label>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Genre">
+    <rdfs:comment>
+        An anchor point for a programmes' genre taxonomy, e.g. 'Drama'/'Biographical'.
+	</rdfs:comment>
+    <rdfs:label>genre</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Format">
+    <rdfs:comment>
+        Anchor point for format taxonomies, similar to po:Genre for genre taxonomies.
+        Instances of this concept include documentaries, talk shows, animation, etc.
+    </rdfs:comment>
+    <rdfs:label>format</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Subject">
+    <rdfs:comment>
+        Anchor point for subject taxonomies.
+    </rdfs:comment>
+    <rdfs:label>subject</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Place">
+    <rdfs:comment>A physical place</rdfs:comment>
+    <rdfs:label>place</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Category"/>
+    <owl:equivalentClass rdf:resource="http://www.w3.org/2003/01/geo/wgs84_pos#Feature"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Person">
+    <rdfs:comment>A person</rdfs:comment>
+    <rdfs:label>person</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Category"/>
+    <owl:equivalentClass rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Version">
+    <rdfs:comment>
+		A particular version of an episode.
+		Such versions include shortened ones, audio described ones
+		or ones that holds sign language.
+		The version is associated to a timeline.
+	</rdfs:comment>
+    <rdfs:label>version</rdfs:label>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="OriginalVersion">
+    <rdfs:comment>
+		An `original' version, the legacy version of
+		a particular episode.
+	</rdfs:comment>
+    <rdfs:label>original version</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Version"/>
+    <owl:disjointWith rdf:resource="ShortenedVersion"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="AudioDescribedVersion">
+    <rdfs:comment>
+		A version holding an audio description.
+	</rdfs:comment>
+    <rdfs:label>audio description</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Version"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="SignedVersion">
+    <rdfs:comment>
+		A version holding sign language.
+	</rdfs:comment>
+    <rdfs:label>sign language</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Version"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="ShortenedVersion">
+    <rdfs:comment>
+		A shortened version.
+	</rdfs:comment>
+    <rdfs:label>shortened version</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Version"/>
+    <owl:disjointWith rdf:resource="OriginalVersion"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Broadcast">
+    <rdfs:comment>
+		A broadcast event.
+		Subsumes the event concept defined in
+		the Event ontology.
+		A broadcast is associated with a service, and with a
+		particular version of an episode.
+	</rdfs:comment>
+    <rdfs:label>broadcast</rdfs:label>
+    <rdfs:subClassOf rdf:resource="../../NET/c4dm/event.owl#Event"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="FirstBroadcast">
+    <rdfs:comment>
+		Specifies a broadcast as being the 
+		first one of a particular version.
+	 </rdfs:comment>
+    <rdfs:label>first broadcast</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Broadcast"/>
+    <owl:disjointWith rdf:resource="RepeatBroadcast"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="RepeatBroadcast">
+    <rdfs:comment>
+		Specifies a broadcast as being a 
+		repeat.
+	</rdfs:comment>
+    <rdfs:label>repeat</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Broadcast"/>
+    <owl:disjointWith rdf:resource="FirstBroadcast"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Season">
+    <rdfs:comment>
+		A season is a group of broadcasts.
+	</rdfs:comment>
+    <rdfs:label>season</rdfs:label>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Broadcaster">
+    <rdfs:comment>
+		An organization responsible of some broadcasting services. 
+        It can hold a set of services and outlets.
+	</rdfs:comment>
+    <rdfs:label>broadcaster</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Service">
+    <rdfs:comment>
+        A broadcasting service.
+		Instances of this concept include BBC Radio Wales, BBC Radio 4, BBC News, etc.
+        A service is a collection of outlets which contain common material, but with some variations, e.g. by
+        region.
+        Hence, a service may have multiple outlets (po:Outlet), e.g. BBC Radio 4 has BBC Radio 4 LW and BBC Radio 4 FM.
+        A hierarchy of services types is defined within this ontology, e.g. radio and TV.
+        A service that is a master brand only (a service that only commissions programmes, e.g. BBC Switch) should 
+        be an instance of the top-level po:Service.
+	</rdfs:comment>
+    <rdfs:label>service</rdfs:label>
+    <vs:term_status>stable</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Outlet">
+    <rdfs:comment>
+        Outlet of a particular service, e.g. Radio 4 LW and FM for Radio 4.
+        Outlets are services which do not have variations.
+        The identity criteria for an outlet is its timeline. 
+        For example, Radio 4 LW broadcasts on Analogue Long Wave, but also on Digital Satellite.
+        It corresponds to just one outlet, as they are simulcasts.
+        The two physical channels for broadcasts correspond to po:Channel.
+    </rdfs:comment>
+    <rdfs:label>outlet</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Service"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Channel">
+    <rdfs:comment>
+        A physical channel on which a broadcast occurs.
+        A single outlet or service can be associated with multiple channels. 
+        For example, Radio 4 LW broadcasts on Analogue Long Wave and on Digital
+        Satellite.
+    </rdfs:comment>
+    <rdfs:label>physical channel</rdfs:label>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Radio">
+    <rdfs:comment>
+		Services that use a radio medium.
+	</rdfs:comment>
+    <rdfs:label>radio</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Service"/>
+    <owl:disjointWith rdf:resource="TV"/>
+    <owl:disjointWith rdf:resource="Web"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="LocalRadio">
+    <rdfs:comment>
+		Radio services aiming at a local coverage.
+	</rdfs:comment>
+    <rdfs:label>radio</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Radio"/>
+    <owl:disjointWith rdf:resource="NationalRadio"/>
+    <owl:disjointWith rdf:resource="RegionalRadio"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="RegionalRadio">
+    <rdfs:comment>
+		Radio services aiming at a regional coverage.
+	</rdfs:comment>
+    <rdfs:label>regional radio</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Radio"/>
+    <owl:disjointWith rdf:resource="NationalRadio"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="NationalRadio">
+    <rdfs:comment>
+		Radio services aiming at a national coverage.
+	</rdfs:comment>
+    <rdfs:label>national radio</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Radio"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="TV">
+    <rdfs:comment>
+		Services that use a television medium.
+	</rdfs:comment>
+    <rdfs:label>tv</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Service"/>
+    <owl:disjointWith rdf:resource="Web"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Web">
+    <rdfs:comment>
+		Services that use a Web medium.
+	</rdfs:comment>
+    <rdfs:label>web</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Service"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="FM">
+    <rdfs:comment>
+		The FM broadcast band
+	</rdfs:comment>
+    <rdfs:label>FM</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Channel"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="LW">
+    <rdfs:comment>
+		The AM broadcast band
+	</rdfs:comment>
+    <rdfs:label>AM</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Channel"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="DAB">
+    <rdfs:comment>
+		Digital Audio Broadcasting
+	</rdfs:comment>
+    <rdfs:label>DAB</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Channel"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="DVB">
+    <rdfs:comment>
+		Digital Video Broadcasting
+	</rdfs:comment>
+    <rdfs:label>DAB</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Channel"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="IPStream">
+    <rdfs:comment>
+		IP stream
+	</rdfs:comment>
+    <rdfs:label>IP stream</rdfs:label>
+    <rdfs:subClassOf rdf:resource="Channel"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Segment">
+    <rdfs:comment>
+		Classification of an episode version's region, e.g. 'this track was played at that time'.
+	</rdfs:comment>
+    <rdfs:label>segment</rdfs:label>
+    <rdfs:subClassOf rdf:resource="../../NET/c4dm/event.owl#Event"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="MusicSegment">
+    <rdfs:comment>
+		Classification of an episode version's region corresponding to a musical track being played.
+	</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="Segment"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="SpeechSegment">
+    <rdfs:comment>
+        Classification of an episode version's region holding speech content.
+    </rdfs:comment>
+    <rdfs:subClassOf rdf:resource="Segment"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:Class rdf:about="Subtitle">
+    <rdfs:comment>
+        Classification of an episode version's region corresponding to a subtitle being shown. 
+    </rdfs:comment>
+    <rdfs:label>subtitle</rdfs:label>
+    <rdfs:subClassOf rdf:resource="../../NET/c4dm/event.owl#Event"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="masterbrand">
+    <rdfs:comment>Associates a programme with its masterbrand (its commissionner)</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>masterbrand</rdfs:label>
+    <rdfs:range rdf:resource="Service"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="track">
+    <rdfs:comment>Associates a music segment with a track, as defined in MO</rdfs:comment>
+    <rdfs:domain rdf:resource="MusicSegment"/>
+    <rdfs:label>track</rdfs:label>
+    <rdfs:range rdf:resource="../mo/Track"/>
+    <rdfs:subPropertyOf rdf:resource="../../NET/c4dm/event.owl#factor"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="season_broadcast">
+    <rdfs:comment>Associates a season to its constituent broadcasts</rdfs:comment>
+    <rdfs:domain rdf:resource="Season"/>
+    <rdfs:label>broadcast</rdfs:label>
+    <rdfs:range rdf:resource="Broadcast"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="outlet">
+    <rdfs:comment>
+		Associates a service to an outlet, e.g. Radio 4 to Radio 4 LW.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Service"/>
+    <rdfs:label>outlet</rdfs:label>
+    <rdfs:range rdf:resource="Outlet"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="channel">
+    <rdfs:comment>
+        Associates a service to a channel, e.g. Radio 4 LW to Radio 4 LW on Analogue Long Wave.
+    </rdfs:comment>
+    <rdfs:domain rdf:resource="Service"/>
+    <rdfs:label>channel</rdfs:label>
+    <rdfs:range rdf:resource="Channel"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="broadcaster">
+    <rdfs:comment>
+		Associates a service to a broadcaster
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Service"/>
+    <rdfs:label>broadcaster</rdfs:label>
+    <rdfs:range rdf:resource="Broadcaster"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="location">
+    <rdfs:comment>
+		Associates a service to a geographic location, 
+		aiming at capturing what this service aims at covering.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Service"/>
+    <rdfs:label>location</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing"/>
+    <rdfs:subPropertyOf rdf:resource="http://xmlns.com/foaf/0.1/based_near"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="episode">
+    <rdfs:comment>
+		Associates a brand or a series to an episode constituting it.
+	</rdfs:comment>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf>
+          <rdf:Description>
+            <rdf:first rdf:resource="Brand"/>
+            <rdf:rest>
+              <rdf:Description>
+                <rdf:first rdf:resource="Series"/>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+              </rdf:Description>
+            </rdf:rest>
+          </rdf:Description>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:label>episode</rdfs:label>
+    <rdfs:range rdf:resource="Episode"/>
+    <rdfs:subPropertyOf rdf:resource="../../dc/terms/hasPart"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="clip">
+    <rdfs:comment>
+        Associates a brand, a series or an episode to a clip.
+    </rdfs:comment>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf>
+          <rdf:Description>
+            <rdf:first rdf:resource="Brand"/>
+            <rdf:rest>
+              <rdf:Description>
+                <rdf:first rdf:resource="Series"/>
+                <rdf:rest>
+                  <rdf:Description>
+                    <rdf:first rdf:resource="Episode"/>
+                    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                  </rdf:Description>
+                </rdf:rest>
+              </rdf:Description>
+            </rdf:rest>
+          </rdf:Description>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:label>clip</rdfs:label>
+    <rdfs:range rdf:resource="Clip"/>
+    <rdfs:subPropertyOf rdf:resource="../../dc/terms/hasPart"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="series">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+    <rdfs:comment>
+		Associates a brand or a series to a series constituting it.
+	</rdfs:comment>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf>
+          <rdf:Description>
+            <rdf:first rdf:resource="Brand"/>
+            <rdf:rest>
+              <rdf:Description>
+                <rdf:first rdf:resource="Series"/>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+              </rdf:Description>
+            </rdf:rest>
+          </rdf:Description>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:label>series</rdfs:label>
+    <rdfs:range rdf:resource="Series"/>
+    <rdfs:subPropertyOf rdf:resource="../../dc/terms/hasPart"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="parent_series">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+    <rdfs:comment>
+		Relates a series to a series constituting it (eg. `Waking the dead').
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Series"/>
+    <rdfs:label>parent serie</rdfs:label>
+    <rdfs:range rdf:resource="Series"/>
+    <rdfs:subPropertyOf rdf:resource="../../dc/terms/isPartOf"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="parent_service">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+    <rdfs:comment>
+		Relates a service to another service encapsulating it (eg. `BBC One' and `BBC One South')
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Service"/>
+    <rdfs:label>parent service</rdfs:label>
+    <rdfs:range rdf:resource="Service"/>
+    <rdfs:subPropertyOf rdf:resource="../../dc/terms/isPartOf"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="service">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:comment>
+		Associate a brand, series or episode to the master brand service.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>service</rdfs:label>
+    <rdfs:range rdf:resource="Service"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="version">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+    <rdfs:comment>
+		Associate an episode to a version of it.
+		Different versions of a same episode can exist (shortened version, version
+		designed for the hearing impaired, etc.). 
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="ProgrammeItem"/>
+    <rdfs:label>version</rdfs:label>
+    <rdfs:range rdf:resource="Version"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="broadcast_on">
+    <rdfs:comment>
+		Relates a particular broadcast to the service or outlet on which it was on.
+		Sub-property of the event:factor one.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Broadcast"/>
+    <rdfs:label>broadcast on</rdfs:label>
+    <rdfs:range rdf:resource="Service"/>
+    <rdfs:subPropertyOf rdf:resource="../../NET/c4dm/event.owl#factor"/>
+    <owl:equivalentProperty rdf:resource="broadcasted_on"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="broadcasted_on">
+    <rdfs:comment>Deprecated property, left here for historical reasons</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="broadcast_of">
+    <rdfs:comment>
+		Relates a particular broadcast to the version being broadcasted.
+		Sub-property of the event:factor one.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Broadcast"/>
+    <rdfs:label>broadcast of</rdfs:label>
+    <rdfs:range rdf:resource="Version"/>
+    <rdfs:subPropertyOf rdf:resource="../../NET/c4dm/event.owl#factor"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="category">
+    <rdfs:comment>
+        Relates a programme to a particular category, e.g. genre, format, place...
+    </rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>category</rdfs:label>
+    <rdfs:range rdf:resource="Genre"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="genre">
+    <rdfs:comment>
+		Relates a programme to a particular genre.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>genre</rdfs:label>
+    <rdfs:range rdf:resource="Genre"/>
+    <rdfs:subPropertyOf rdf:resource="category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="format">
+    <rdfs:comment>
+		Relates a programme to a particular format (eg. `Animation', `Documentary', etc.).
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>format</rdfs:label>
+    <rdfs:range rdf:resource="Format"/>
+    <rdfs:subPropertyOf rdf:resource="category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="subject">
+    <rdfs:comment>
+        Relates a programme to a subject (e.g. `easter')
+    </rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>subject</rdfs:label>
+    <rdfs:range rdf:resource="Subject"/>
+    <rdfs:subPropertyOf rdf:resource="category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="place">
+    <rdfs:comment>
+        Relates a programme to a place (e.g. `London')
+    </rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>place</rdfs:label>
+    <rdfs:range rdf:resource="Place"/>
+    <rdfs:subPropertyOf rdf:resource="category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="person">
+    <rdfs:comment>
+        Relates a programme to a person
+    </rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>person</rdfs:label>
+    <rdfs:range rdf:resource="Person"/>
+    <rdfs:subPropertyOf rdf:resource="category"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="credit">
+    <rdfs:comment>Relates a programmes to a person who is credited in it</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>credit</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="../../dc/elements/1.1/contributor"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="actor">
+    <rdfs:comment>Relates a programmes to one of its actors - a person who plays the role of a character</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>actor</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="anchor">
+    <rdfs:comment>A television reporter who coordinates a programme</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>anchor</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="participant">
+    <rdfs:comment>Relates a programme to one of its participants</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>participant</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="commentator">
+    <rdfs:comment>Relates a programme to one of its commentators</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>commentator</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="executive_producer">
+    <rdfs:comment>Relates a programme to its executive producer - a producer who is not involved in any technical aspects of the making process, but who is still responsible for the overall production. Typically an executive producer handles business and legal issues</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>executive producer</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="performer">
+    <rdfs:comment>Relates a programme to an entertainer who performs a dramatic or musical work for audience</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>performer</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="director">
+    <rdfs:comment>Relates a programme to its supervisor. Generally refers to the person responsible for all audience-visible components of a program, film, or show, whereas the producer is responsible for the financial and other behind-the-scenes aspects. A director's duties might also include casting, script editing, shot selection, shot composition, and editing</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>director</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="author">
+    <rdfs:comment>Relates a programme to its author - the person who created the content</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>author</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="producer">
+    <rdfs:comment>Relates a programme to its producer - the manager of an event, show, or other work, usually the individual in charge of finance, personnel, and other non-artistic aspects in the development of commercials, plays, movies, and other works</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>producer</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="news_reader">
+    <rdfs:comment>Relates a programme to its news reader</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>news reader</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <rdfs:subPropertyOf rdf:resource="credit"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="microsite">
+    <rdfs:comment>Associates a programme to its microsite. For example http://www.bbc.co.uk/programmes/b00fm04s and http://www.bbc.co.uk/eastenders/</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>microsite</rdfs:label>
+    <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Document"/>
+    <rdfs:subPropertyOf rdf:resource="http://xmlns.com/foaf/0.1/page"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="text">
+    <rdfs:comment>Associates a subtitle event to the corresponding text</rdfs:comment>
+    <rdfs:domain rdf:resource="Subtitle"/>
+    <rdfs:label>text</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="frequency">
+    <rdfs:comment>Associates a channel to its frequency</rdfs:comment>
+    <rdfs:domain rdf:resource="Channel"/>
+    <rdfs:label>frequency</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="position">
+    <rdfs:comment>The position of a particular series or episode within its containing programme. This property can also be used to give the position of an interval within the containing timeline.</rdfs:comment>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf>
+          <rdf:Description>
+            <rdf:first rdf:resource="Episode"/>
+            <rdf:rest>
+              <rdf:Description>
+                <rdf:first rdf:resource="Series"/>
+                <rdf:rest>
+                  <rdf:Description>
+                    <rdf:first rdf:resource="../../NET/c4dm/timeline.owl#Interval"/>
+                    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                  </rdf:Description>
+                </rdf:rest>
+              </rdf:Description>
+            </rdf:rest>
+          </rdf:Description>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:label>position</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="subtitle_language">
+    <rdfs:comment>Language of the subtitles emebedded in a particular version</rdfs:comment>
+    <rdfs:domain rdf:resource="Version"/>
+    <rdfs:label>subtitle language</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="aspect_ratio">
+    <rdfs:comment>
+		The aspect ration of a particular version.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Version"/>
+    <rdfs:label>aspect ratio</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="sound_format">
+    <rdfs:comment>
+		The sound format of a particular version.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Version"/>
+    <rdfs:label>sound format</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="synopsis">
+    <rdfs:comment>
+		The synopsis of a serie, brand or episode.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Programme"/>
+    <rdfs:label>synopsis</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="short_synopsis">
+    <rdfs:comment>
+		A short synopsis of a serie, brand or episode.
+		Sub-property of po:synopsis.
+	</rdfs:comment>
+    <rdfs:label>short synopsis</rdfs:label>
+    <rdfs:subPropertyOf rdf:resource="synopsis"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="medium_synopsis">
+    <rdfs:comment>
+		A medium synopsis of a serie, brand or episode.
+		Sub-property of po:synopsis.
+	</rdfs:comment>
+    <rdfs:label>medium synopsis</rdfs:label>
+    <rdfs:subPropertyOf rdf:resource="synopsis"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="long_synopsis">
+    <rdfs:comment>
+		A long synopsis of a serie, brand or episode.
+		Sub-property of po:synopsis.
+	</rdfs:comment>
+    <rdfs:label>long synopsis</rdfs:label>
+    <rdfs:subPropertyOf rdf:resource="synopsis"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="schedule_date">
+    <rdfs:comment>
+		The schedule date of a broadcast event.
+	</rdfs:comment>
+    <rdfs:domain rdf:resource="Broadcast"/>
+    <rdfs:label>schedule date</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="duration">
+    <rdfs:comment>The duration of a version, in seconds.</rdfs:comment>
+    <rdfs:label>duration</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <vs:term_status>testing</vs:term_status>
+  </owl:DatatypeProperty>
+  <owl:ObjectProperty rdf:about="time">
+    <rdfs:comment>Associates an episode's version or a version's segment with a temporal interval. This interval can be associated with a timeline, serving as an anchor for further temporal annotations, e.g. subtitles or played track</rdfs:comment>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf>
+          <rdf:Description>
+            <rdf:first rdf:resource="Version"/>
+            <rdf:rest>
+              <rdf:Description>
+                <rdf:first rdf:resource="Segment"/>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+              </rdf:Description>
+            </rdf:rest>
+          </rdf:Description>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
+    <rdfs:label>time</rdfs:label>
+    <rdfs:range rdf:resource="../../NET/c4dm/timeline.owl#Interval"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://www.holygoat.co.uk/owl/redwood/0.1/tags/tag">
+    <rdfs:comment>Associates an episode to a particular tag</rdfs:comment>
+    <rdfs:domain rdf:resource="ProgrammeItem"/>
+    <rdfs:label>tag</rdfs:label>
+    <rdfs:range rdf:resource="http://www.holygoat.co.uk/owl/redwood/0.1/tags/Tagging"/>
+    <vs:term_status>stable</vs:term_status>
+  </owl:ObjectProperty>
+  <owl:Class rdf:about="../mo/Track"/>
+  <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Person"/>
+  <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Agent"/>
+  <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Organization"/>
+  <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Document"/>
+  <owl:Class rdf:about="http://www.holygoat.co.uk/owl/redwood/0.1/tags/Tagging"/>
+  <owl:Class rdf:about="http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing"/>
+  <owl:ObjectProperty rdf:about="http://xmlns.com/foaf/0.1/based_near"/>
+  <owl:ObjectProperty rdf:about="http://xmlns.com/foaf/0.1/page"/>
+  <owl:ObjectProperty rdf:about="../../dc/elements/1.1/contributor"/>
+  <owl:ObjectProperty rdf:about="../../dc/elements/1.1/creator"/>
+  <owl:ObjectProperty rdf:about="../../dc/terms/isPartOf"/>
+  <owl:ObjectProperty rdf:about="../../dc/terms/hasPart"/>
+  <owl:DatatypeProperty rdf:about="../../dc/elements/1.1/date"/>
+  <foaf:Person rdf:about="http://www.aelius.com/njh#me"/>
+  <foaf:Person rdf:about="http://metade.org/foaf.rdf#me"/>
+  <foaf:Person rdf:about="http://moustaki.org/foaf.rdf#moustaki"/>
+</rdf:RDF>

@@ -109,7 +109,8 @@ public enum FrameIdentifier
 	APIC("Attached picture", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyAPIC apic = (FrameBodyAPIC) body;
 			Model model = result.getModel();
@@ -129,7 +130,8 @@ public enum FrameIdentifier
 	COMM("Comments", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			String description = ((FrameBodyCOMM) body).getDescription();
 			Model model = result.getModel();
@@ -140,8 +142,8 @@ public enum FrameIdentifier
 			String resultString = (addDescription ? description : "")
 					+ (addDescription && addText ? "\n" : "")
 					+ (addText ? text : "");
-			model.addStatement(track, DC.description, ModelUtil.createLiteral(
-					model, resultString));
+			model.addStatement(resourceMap.get(ID3Util.TRACK), DC.description,
+					ModelUtil.createLiteral(model, resultString));
 			id3v1props.remove(DC.description);
 		}
 	},
@@ -176,7 +178,8 @@ public enum FrameIdentifier
 	MCDI("Music CD identifier", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			// the jaudiotagger sucks, the FrameBodyMCDI doesn't have any
 			// methods that would allow us to put anything interesting
@@ -191,7 +194,8 @@ public enum FrameIdentifier
 	PCNT("Play counter", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyPCNT playcountFB = (FrameBodyPCNT) body;
 			Model model = result.getModel();
@@ -203,13 +207,15 @@ public enum FrameIdentifier
 							.intValue()));
 			model.addStatement(playcounter, DC.title, ModelUtil.createLiteral(
 					model, "ID3 Play counter"));
-			model.addStatement(playcounter, PBO.media_object, track);
+			model.addStatement(playcounter, PBO.media_object, resourceMap
+					.get(ID3Util.TRACK));
 		}
 	}, // acts as general play counter
 	POPM("Popularimeter", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyPOPM popularimeterFB = (FrameBodyPOPM) body;
 			Model model = result.getModel();
@@ -250,13 +256,15 @@ public enum FrameIdentifier
 	TALB("Album/Movie/Show title", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTALB albumTitleFB = (FrameBodyTALB) body;
 			Model model = result.getModel();
 
-			ID3Util.checkRecord(model, albumTitleFB.getFirstTextValue(),
-					musicAlbum, track);
+			ID3Util.addRecordTitle(model, albumTitleFB.getFirstTextValue(),
+					resourceMap.get(ID3Util.MUSICALBUM), resourceMap
+							.get(ID3Util.TRACK));
 
 			id3v1props.remove(NID3.albumTitle);
 		}
@@ -264,24 +272,28 @@ public enum FrameIdentifier
 	TBPM("BPM (beats per minute)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTBPM bpmFB = (FrameBodyTBPM) body;
 
 			Model model = result.getModel();
 
-			ID3Util.checkSignal(model, result, signal);
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
 
 			// should be an integer stored as string and now transformed to a
 			// float value
-			model.addStatement(signal, MO.bpm, ModelUtil.createLiteral(model,
-					Float.valueOf(bpmFB.getFirstTextValue()).floatValue()));
+			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.bpm,
+					ModelUtil.createLiteral(model, Float.valueOf(
+							bpmFB.getFirstTextValue()).floatValue()));
 		}
 	},
 	TCOM("Composer", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTCOM composerFB = (FrameBodyTCOM) body;
 			Model model = result.getModel();
@@ -289,31 +301,32 @@ public enum FrameIdentifier
 			// I use here currently frbr:subject, maybe a proper (inverse)
 			// relation, e.g. mo:musical_work, might be better
 			// FIXME: currently it is a work to item relation
-			if (!model.contains(ModelUtil.createStatement(model, musicalWork,
-					FRBR.subject, result.getDescribedUri())))
+			if (!model.contains(ModelUtil.createStatement(model, resourceMap
+					.get(ID3Util.MUSICALWORK), FRBR.subject, result
+					.getDescribedUri())))
 			{
-				model.addStatement(musicalWork, FRBR.subject, result
-						.getDescribedUri());
-				model.addStatement(musicalWork, RDF.type, MO.MusicalWork);
+				model.addStatement(resourceMap.get(ID3Util.MUSICALWORK),
+						FRBR.subject, result.getDescribedUri());
+				model.addStatement(resourceMap.get(ID3Util.MUSICALWORK),
+						RDF.type, MO.MusicalWork);
 			}
 
 			// relate the musical work to its composition event
 			Resource composition = ModelUtil.generateRandomResource(model);
-			model.addStatement(musicalWork, MO.composed_in, composition);
+			model.addStatement(resourceMap.get(ID3Util.MUSICALWORK),
+					MO.composed_in, composition);
 			model.addStatement(composition, RDF.type, MO.Composition);
 
 			// relate the composition event to its composer
-			Resource composer = ModelUtil.generateRandomResource(model);
-			model.addStatement(composition, MO.composer, composer);
-			model.addStatement(composer, RDF.type, MO.Composer);
-			model.addStatement(composer, FOAF.name, ModelUtil.createLiteral(
-					model, composerFB.getFirstTextValue()));
+			ID3Util.addAgent(model, composition, MO.composer, MO.Composer,
+					composerFB.getFirstTextValue());
 		}
 	},
 	TCON("Content type", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			String value = ((FrameBodyTCON) body).getFirstTextValue();
 
@@ -337,8 +350,8 @@ public enum FrameIdentifier
 						{
 							// FIXME: a music genre can also be item specific
 							// (subjective, personal)
-							model.addStatement(track, MO.genre, genreUri
-									.getUri());
+							model.addStatement(resourceMap.get(ID3Util.TRACK),
+									MO.genre, genreUri.getUri());
 							ok = true;
 						}
 					}
@@ -360,8 +373,9 @@ public enum FrameIdentifier
 				// duplicate check etc)
 				// a music genre can also be item specific (subjective,
 				// personal)
-				model.addStatement(track, MO.genre, new URIImpl(
-						Namespaces.PMKB_NS + GenreUri.GENRE_RURI + value));
+				model.addStatement(resourceMap.get(ID3Util.TRACK), MO.genre,
+						new URIImpl(Namespaces.PMKB_NS + GenreUri.GENRE_RURI
+								+ value));
 			}
 			id3v1props.remove(NID3.contentType);
 		}
@@ -378,18 +392,19 @@ public enum FrameIdentifier
 	TEXT("Lyricist/Text writer", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTEXT lyricistFB = (FrameBodyTEXT) body;
 			Model model = result.getModel();
 
-			ID3Util.checkLyrics(model, track, lyrics);
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					MO.publication_of, resourceMap.get(ID3Util.LYRICS),
+					MO.Lyrics);
 
-			Resource lyricist = ModelUtil.generateRandomResource(model);
-			model.addStatement(lyrics, DCTERMS.creator, lyricist);
-			model.addStatement(lyricist, RDF.type, FOAF.Person);
-			model.addStatement(lyricist, FOAF.name, ModelUtil.createLiteral(
-					model, lyricistFB.getFirstTextValue()));
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.LYRICS),
+					DCTERMS.creator, FOAF.Person, lyricistFB
+							.getFirstTextValue());
 		}
 	},
 	TFLT("File type", false), // some types are predefined, although, further
@@ -402,7 +417,8 @@ public enum FrameIdentifier
 	TIT2("Title/songname/content description", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Model model = result.getModel();
 			FrameBodyTIT2 titleFB = (FrameBodyTIT2) body;
@@ -421,31 +437,37 @@ public enum FrameIdentifier
 	TKEY("Initial key", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTKEY keyFB = (FrameBodyTKEY) body;
 			if (keyFB.isValid())
 			{
 				Model model = result.getModel();
 
-				ID3Util.checkSignal(model, result, signal);
+				ID3Util.checkStatementObject(model, result.getDescribedUri(),
+						MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
 
-				model.addStatement(signal, MO.key, KeyUri.getKeyByStringId(
-						keyFB.getFirstTextValue()).getUri());
+				model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.key,
+						KeyUri.getKeyByStringId(keyFB.getFirstTextValue())
+								.getUri());
 			}
 		}
 	},
 	TLAN("Language(s)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTLAN languageFB = (FrameBodyTLAN) body;
 			if (languageFB.isValid())
 			{
 				Model model = result.getModel();
 
-				ID3Util.checkLyrics(model, track, lyrics);
+				ID3Util.checkStatementObject(model, resourceMap
+						.get(ID3Util.TRACK), MO.publication_of, resourceMap
+						.get(ID3Util.LYRICS), MO.Lyrics);
 
 				// TODO: we have to store the ISO-639-2 based language tag(s) as
 				// language tag of the lyrics string; that means, we first need
@@ -458,13 +480,15 @@ public enum FrameIdentifier
 	TLEN("Length", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTLEN lengthFB = (FrameBodyTLEN) body;
 
 			Model model = result.getModel();
 
-			ID3Util.checkSignal(model, result, signal);
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
 
 			Resource timeInterval = ModelUtil.generateRandomResource(model);
 			model.addStatement(timeInterval, RDF.type,
@@ -472,42 +496,61 @@ public enum FrameIdentifier
 			model.addStatement(timeInterval, TL.durationInt, ModelUtil
 					.createLiteral(model, Integer.parseInt(lengthFB
 							.getFirstTextValue())));
-			model.addStatement(signal, MO.time, timeInterval);
+			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.time,
+					timeInterval);
 		}
 	},
 	TMED("Media type", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			if (ID3Util.getMediaType((AbstractFrameBodyTextInfo) body) != null)
 			{
 				Model model = result.getModel();
 
-				ID3Util.checkSignal(model, result, signal);
-				ID3Util.checkOriginalSignal(model, signal, originalSignal);
-				ID3Util.checkOriginalMusicalManifestation(model,
-						originalSignal, originalMusicalManifestation);
+				ID3Util.checkStatementObject(model, result.getDescribedUri(),
+						MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+				ID3Util.checkStatementObject(model, resourceMap
+						.get(ID3Util.SIGNAL), MO.derived_from, resourceMap
+						.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+				ID3Util.checkStatementObject(model, resourceMap
+						.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment,
+						resourceMap.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
+						MO.MusicalManifestation);
 
-				model.addStatement(originalMusicalManifestation, MO.media_type,
-						ID3Util.getMediaType((AbstractFrameBodyTextInfo) body));
+				model
+						.addStatement(
+								resourceMap
+										.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
+								MO.media_type,
+								ID3Util
+										.getMediaType((AbstractFrameBodyTextInfo) body));
 			}
 		}
 	}, // describes from which media the sound originated
 	TOAL("Original album/movie/show title", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Model model = result.getModel();
 			FrameBodyTOAL originalTitleFB = (FrameBodyTOAL) body;
 
-			ID3Util.checkSignal(model, result, signal);
-			ID3Util.checkOriginalSignal(model, signal, originalSignal);
-			ID3Util.checkOriginalMusicalManifestation(model, originalSignal,
-					originalMusicalManifestation);
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model,
+					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
+					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
+					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
+					MO.MusicalManifestation);
 
-			model.addStatement(originalMusicalManifestation, DC.title,
+			model.addStatement(resourceMap
+					.get(ID3Util.ORIGINALMUSICALMANIFESTATION), DC.title,
 					ModelUtil.createLiteral(model, originalTitleFB
 							.getFirstTextValue()));
 		}
@@ -515,7 +558,8 @@ public enum FrameIdentifier
 	TOFN("Original filename", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.originalFilename, ((FrameBodyTOFN) body)
 					.getFirstTextValue());
@@ -526,82 +570,87 @@ public enum FrameIdentifier
 	TOLY("Original lyricist(s)/text writer(s)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTOLY originalLyricistFB = (FrameBodyTOLY) body;
 			Model model = result.getModel();
 
-			ID3Util.checkSignal(model, result, signal);
-			ID3Util.checkOriginalSignal(model, signal, originalSignal);
-			ID3Util.checkOriginalMusicalManifestation(model, originalSignal,
-					originalMusicalManifestation);
-			ID3Util.checkOriginalLyrics(model, originalMusicalManifestation,
-					originalLyrics);
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model,
+					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
+					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
+					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
+					MO.MusicalManifestation);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
+					MO.publication_of, resourceMap.get(ID3Util.ORIGINALLYRICS),
+					MO.Lyrics);
 
-			Resource originalLyricist = ModelUtil.generateRandomResource(model);
-			model.addStatement(originalLyrics, DCTERMS.creator,
-					originalLyricist);
-			model.addStatement(originalLyricist, RDF.type, FOAF.Person);
-			model.addStatement(originalLyricist, FOAF.name, ModelUtil
-					.createLiteral(model, originalLyricistFB
-							.getFirstTextValue()));
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.ORIGINALLYRICS),
+					DCTERMS.creator, FOAF.Person, originalLyricistFB
+							.getFirstTextValue());
 		}
 	},
 	TOPE("Original artist(s)/performer(s)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTOPE originalArtistFB = (FrameBodyTOPE) body;
 			Model model = result.getModel();
 
-			ID3Util.checkSignal(model, result, signal);
-			ID3Util.checkOriginalSignal(model, signal, originalSignal);
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model,
+					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
+					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
 
 			// FIXME: handle multiple artists/performers ("/" separated)
-			Resource originalArtist = ModelUtil.generateRandomResource(model);
-			model.addStatement(originalSignal, DC.creator, originalArtist);
-			model.addStatement(originalArtist, RDF.type, MO.MusicArtist);
-			model
-					.addStatement(originalArtist, FOAF.name, ModelUtil
-							.createLiteral(model, originalArtistFB
-									.getFirstTextValue()));
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.ORIGINALSIGNAL),
+					DCTERMS.creator, MO.MusicArtist, originalArtistFB
+							.getFirstTextValue());
 		}
 	},
 	TOWN("File owner/licensee", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTOWN ownerFB = (FrameBodyTOWN) body;
 			Model model = result.getModel();
 
-			Resource owner = ModelUtil.generateRandomResource(model);
 			// frbr:owner (on item level (?))
-			model.addStatement(result.getDescribedUri(), FRBR.owner, owner);
-			model.addStatement(owner, RDF.type, FOAF.Person);
-			model.addStatement(owner, FOAF.name, ModelUtil.createLiteral(model,
-					ownerFB.getFirstTextValue()));
+			ID3Util.addAgent(model, result.getDescribedUri(), FRBR.owner,
+					FOAF.Person, ownerFB.getFirstTextValue());
 		}
 	},
 	TPE1("Lead performer(s)/Soloist(s)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTPE1 soloistFB = (FrameBodyTPE1) body;
 			Model model = result.getModel();
 
 			// FIXME: handle multiple soloists/lead performers ("/" separated)
 			// and mark them somehow explicitly
-			ID3Util.checkArtist(model, soloistFB.getFirstTextValue(), track);
+			ID3Util.checkArtist(model, soloistFB.getFirstTextValue(),
+					resourceMap.get(ID3Util.TRACK));
 			id3v1props.remove(NID3.leadArtist);
 		}
 	},
 	TPE2("Band/orchestra/accompaniment", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTPE2 bandFB = (FrameBodyTPE2) body;
 			Model model = result.getModel();
@@ -609,76 +658,136 @@ public enum FrameIdentifier
 			// FIXME: handle multiple bands/orchestras/accompaniments ("/"
 			// separated ?)
 			// and mark them somehow explicitly
-			ID3Util.checkArtist(model, bandFB.getFirstTextValue(), track);
+			ID3Util.checkArtist(model, bandFB.getFirstTextValue(), resourceMap
+					.get(ID3Util.TRACK));
 		}
 	},
 	TPE3("Conductor/performer refinement", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTPE3 conductorFB = (FrameBodyTPE3) body;
 			Model model = result.getModel();
 
-			ID3Util.checkPerformance(model, signal, performance);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.PERFORMANCE), MO.recorded_as, resourceMap
+					.get(ID3Util.SIGNAL), MO.Performance);
 
-			Resource conductor = ModelUtil.generateRandomResource(model);
-			model.addStatement(performance, MO.conductor, conductor);
-			model.addStatement(conductor, RDF.type, FOAF.Person);
-			model.addStatement(conductor, FOAF.name, ModelUtil.createLiteral(
-					model, conductorFB.getFirstTextValue()));
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.PERFORMANCE),
+					MO.conductor, FOAF.Person, conductorFB.getFirstTextValue());
 		}
 	},
 	TPE4("Interpreted, remixed, or otherwise modified by", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
-			addSimpleContact(NID3.interpretedBy, ((FrameBodyTPE4) body)
-					.getFirstTextValue(), result);
+			FrameBodyTPE4 interpreterFB = (FrameBodyTPE4) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.SIGNAL),
+					MO.interpreter, MO.MusicArtist, interpreterFB
+							.getFirstTextValue());
 		}
 	},
 	TPOS("Part of a set", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.partOfSet, ((FrameBodyTPOS) body)
-					.getFirstTextValue());
+			FrameBodyTPOS positionFB = (FrameBodyTPOS) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RELEASE), MO.record, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.Release);
+
+			// FIXME: may surround this with some try and catch, to avoid null
+			// pointer exceptions
+			model.addStatement(resourceMap.get(ID3Util.MUSICALBUM),
+					MO.record_number, ModelUtil.createLiteral(model, positionFB
+							.getDiscNo().intValue()));
+			ID3Util.checkCount(model, resourceMap.get(ID3Util.RELEASE),
+					MO.record_count, positionFB.getDiscTotal().intValue());
 		}
 	},
 	TPUB("Publisher", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
-			addSimpleContact(NID3.publisher, ((FrameBodyTPUB) body)
-					.getFirstTextValue(), result);
+			FrameBodyTPUB publisherFB = (FrameBodyTPUB) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RELEASE), MO.record, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.Release);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
+					.get(ID3Util.RELEASE), MO.ReleaseEvent);
+
+			// FIXME: associates publisher explicitly as label, however it can
+			// also be a person
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.RELEASEEVENT),
+					MO.label, MO.Label, publisherFB.getFirstTextValue());
 		}
 	},
 	TRCK("Track number/Position in set", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.trackNumber, ((FrameBodyTRCK) body)
-					.getFirstTextValue());
-			id3v1props.remove(NID3.trackNumber);
+			FrameBodyTRCK trackNumberFB = (FrameBodyTRCK) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+
+			// FIXME: may surround this with some try and catch, to avoid null
+			// pointer exceptions
+			model.addStatement(resourceMap.get(ID3Util.TRACK), MO.track_number,
+					ModelUtil.createLiteral(model, trackNumberFB.getTrackNo()
+							.intValue()));
+			ID3Util.checkCount(model, resourceMap.get(ID3Util.MUSICALBUM),
+					MO.track_count, trackNumberFB.getTrackTotal().intValue());
 		}
 	},
 	TRSN("Internet radio station name", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.internetRadioStationName, ((FrameBodyTRSN) body)
-					.getFirstTextValue());
+			FrameBodyTRSN internetRadioStationFB = (FrameBodyTRSN) body;
+			Model model = result.getModel();
+
+			// change item type to MO:Stream
+			model.removeStatement(result.getDescribedUri(), RDF.type,
+					MO.AudioFile);
+			model.addStatement(result.getDescribedUri(), RDF.type, MO.Stream);
 		}
 	},
 	TRSO("Internet radio station owner", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			addSimpleContact(NID3.internetRadioStationOwner,
 					((FrameBodyTRSO) body).getFirstTextValue(), result);
@@ -687,7 +796,8 @@ public enum FrameIdentifier
 	TSRC("ISRC (international standard recording code)", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.internationalStandardRecordingCode,
 					((FrameBodyTSRC) body).getFirstTextValue());
@@ -696,7 +806,8 @@ public enum FrameIdentifier
 	TSSE("Software/Hardware and settings used for encoding", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.encodingSettings, ((FrameBodyTSSE) body)
 					.getFirstTextValue());
@@ -705,7 +816,8 @@ public enum FrameIdentifier
 	TXXX("User defined text information frame", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
 			String description = txxx.getDescription();
@@ -723,7 +835,8 @@ public enum FrameIdentifier
 	UFID("Unique file identifier", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.uniqueFileIdentifier, ((FrameBodyUFID) body)
 					.getOwner()
@@ -734,7 +847,8 @@ public enum FrameIdentifier
 	USLT("Unsynchronised lyric/text transcription", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.unsynchronizedTextContent, ((FrameBodyUSLT) body)
 					.getLyric());
@@ -743,7 +857,8 @@ public enum FrameIdentifier
 	WCOM("Commercial information", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWCOM) body).getUrlLink());
@@ -765,7 +880,8 @@ public enum FrameIdentifier
 	WOAF("Official audio file webpage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWOAF) body).getUrlLink());
@@ -776,7 +892,8 @@ public enum FrameIdentifier
 	WOAR("Official artist/performer webpage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWOAR) body).getUrlLink());
@@ -787,7 +904,8 @@ public enum FrameIdentifier
 	WOAS("Official audio source webpage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWOAS) body).getUrlLink());
@@ -798,7 +916,8 @@ public enum FrameIdentifier
 	WORS("Official Internet radio station homepage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWORS) body).getUrlLink());
@@ -809,7 +928,8 @@ public enum FrameIdentifier
 	WPAY("Payment", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWPAY) body).getUrlLink());
@@ -820,7 +940,8 @@ public enum FrameIdentifier
 	WPUB("Publishers official webpage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			Resource resource = result.getModel().createURI(
 					((FrameBodyWPUB) body).getUrlLink());
@@ -831,7 +952,8 @@ public enum FrameIdentifier
 	WXXX("User defined URL link frame", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyWXXX txxx = (FrameBodyWXXX) body;
 			String description = txxx.getDescription();
@@ -859,7 +981,8 @@ public enum FrameIdentifier
 	TDRC("Recording time", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTDRC tdrc = (FrameBodyTDRC) body;
 			Date date = id3v24timestampToDate(tdrc.getFirstTextValue());
@@ -896,7 +1019,8 @@ public enum FrameIdentifier
 	TDAT("Date", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTDAT tdat = (FrameBodyTDAT) body;
 			String text = tdat.getFirstTextValue();
@@ -950,7 +1074,8 @@ public enum FrameIdentifier
 	TORY("Original release year", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.originalReleaseYear, result.getModel()
 					.createDatatypeLiteral(
@@ -962,7 +1087,8 @@ public enum FrameIdentifier
 	TRDA("Recording dates", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.recordingDate, ((FrameBodyTRDA) body)
 					.getFirstTextValue());
@@ -979,7 +1105,8 @@ public enum FrameIdentifier
 	TYER("Year", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
 			result.add(NID3.recordingYear, result.getModel()
 					.createDatatypeLiteral(
@@ -1039,16 +1166,7 @@ public enum FrameIdentifier
 
 	private String name;
 	private boolean isSupported;
-	private static Resource track;
-	private static Resource musicAlbum;
-	private static Resource signal;
-	private static Resource musicalWork;
-	private static Resource lyrics;
 	private static String lyricsLanguage;
-	private static Resource originalSignal;
-	private static Resource originalMusicalManifestation;
-	private static Resource originalLyrics;
-	private static Resource performance;
 
 	FrameIdentifier(String name, boolean isSupported)
 	{
@@ -1066,56 +1184,6 @@ public enum FrameIdentifier
 		return isSupported;
 	}
 
-	public Resource getTrack()
-	{
-		return track;
-	}
-
-	public void setTrack(Resource t)
-	{
-		track = t;
-	}
-
-	public Resource getMusicAlbum()
-	{
-		return musicAlbum;
-	}
-
-	public void setMusicAlbum(Resource mA)
-	{
-		musicAlbum = mA;
-	}
-
-	public Resource getSignal()
-	{
-		return signal;
-	}
-
-	public void setSignal(Resource s)
-	{
-		signal = s;
-	}
-
-	public Resource getMusicalWork()
-	{
-		return musicalWork;
-	}
-
-	public void setMusicalWork(Resource mW)
-	{
-		musicalWork = mW;
-	}
-
-	public Resource getLyrics()
-	{
-		return lyrics;
-	}
-
-	public void setLyrics(Resource l)
-	{
-		lyrics = l;
-	}
-
 	public String getLyricsLanguage()
 	{
 		return lyricsLanguage;
@@ -1126,48 +1194,9 @@ public enum FrameIdentifier
 		lyricsLanguage = ll;
 	}
 
-	public Resource getOriginalSignal()
-	{
-		return originalSignal;
-	}
-
-	public void setOriginalSignal(Resource os)
-	{
-		originalSignal = os;
-	}
-
-	public Resource getOriginalMusicalManifestation()
-	{
-		return originalMusicalManifestation;
-	}
-
-	public void setOriginalMusicalManifestation(Resource om)
-	{
-		originalMusicalManifestation = om;
-	}
-
-	public Resource getOriginalLyrics()
-	{
-		return originalLyrics;
-	}
-
-	public void setOriginalLyrics(Resource ol)
-	{
-		originalLyrics = ol;
-	}
-
-	public Resource getPerformance()
-	{
-		return performance;
-	}
-
-	public void setPerformance(Resource p)
-	{
-		performance = p;
-	}
-
 	public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-			HashMap<URI, String> id3v1props, RDFContainer result)
+			HashMap<URI, String> id3v1props, RDFContainer result,
+			HashMap<String, Resource> resourceMap)
 	{
 		// the default behavior for unsupported frames is to do nothing
 	}

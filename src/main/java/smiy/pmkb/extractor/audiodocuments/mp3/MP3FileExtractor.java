@@ -44,12 +44,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import smiy.pmkb.util.Namespaces;
-import smiy.pmkb.vocabulary.DCTERMS;
+import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.MFO;
-import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.MO;
-import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.TIME;
 import smiy.pmkb.vocabulary.TL;
 
@@ -59,8 +57,7 @@ import smiy.pmkb.vocabulary.TL;
 public class MP3FileExtractor extends AbstractFileExtractor
 {
 
-	private static Resource track;
-	private static Resource musicAlbum;
+	private HashMap<String, Resource> resourceMap;
 
 	private Logger logger = LoggerFactory.getLogger(MP3FileExtractor.class);
 
@@ -86,8 +83,17 @@ public class MP3FileExtractor extends AbstractFileExtractor
 
 		Model model = result.getModel();
 
-		track = ModelUtil.generateRandomResource(model);
-		musicAlbum = ModelUtil.generateRandomResource(model);
+		Resource track = ModelUtil.generateRandomResource(model);
+		Resource musicAlbum = ModelUtil.generateRandomResource(model);
+		Resource release = ModelUtil.generateRandomResource(model);
+		Resource releaseEvent = ModelUtil.generateRandomResource(model);
+
+		resourceMap = new HashMap<String, Resource>();
+
+		resourceMap.put(ID3Util.TRACK, track);
+		resourceMap.put(ID3Util.MUSICALBUM, musicAlbum);
+		resourceMap.put(ID3Util.RELEASE, release);
+		resourceMap.put(ID3Util.RELEASEEVENT, releaseEvent);
 
 		model.addStatement(track, MO.available_as, result.getDescribedUri());
 		model.addStatement(track, RDF.type, MO.Track);
@@ -211,9 +217,19 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource musicalWork = ModelUtil.generateRandomResource(model);
 		Resource lyrics = ModelUtil.generateRandomResource(model);
 		Resource originalSignal = ModelUtil.generateRandomResource(model);
-		Resource originalMusicalManifestation = ModelUtil.generateRandomResource(model);
+		Resource originalMusicalManifestation = ModelUtil
+				.generateRandomResource(model);
 		Resource originalLyrics = ModelUtil.generateRandomResource(model);
 		Resource performance = ModelUtil.generateRandomResource(model);
+
+		resourceMap.put(ID3Util.SIGNAL, signal);
+		resourceMap.put(ID3Util.MUSICALWORK, musicalWork);
+		resourceMap.put(ID3Util.LYRICS, lyrics);
+		resourceMap.put(ID3Util.ORIGINALSIGNAL, originalSignal);
+		resourceMap.put(ID3Util.ORIGINALMUSICALMANIFESTATION,
+				originalMusicalManifestation);
+		resourceMap.put(ID3Util.ORIGINALLYRICS, originalLyrics);
+		resourceMap.put(ID3Util.PERFORMANCE, performance);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
@@ -227,16 +243,8 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				FrameIdentifier frameIdentifier = FrameIdentifier
 						.valueOf(identifier.trim());
 				AbstractTagFrameBody body = frame.getBody();
-				frameIdentifier.setTrack(track);
-				frameIdentifier.setMusicAlbum(musicAlbum);
-				frameIdentifier.setSignal(signal);
-				frameIdentifier.setMusicalWork(musicalWork);
-				frameIdentifier.setLyrics(lyrics);
-				frameIdentifier.setOriginalSignal(originalSignal);
-				frameIdentifier.setOriginalMusicalManifestation(originalMusicalManifestation);
-				frameIdentifier.setOriginalLyrics(originalLyrics);
-				frameIdentifier.setPerformance(performance);
-				frameIdentifier.process(body, id3v2, id3v1FieldHashMap, result);
+				frameIdentifier.process(body, id3v2, id3v1FieldHashMap, result,
+						resourceMap);
 			}
 			catch (Exception e)
 			{
@@ -277,12 +285,15 @@ public class MP3FileExtractor extends AbstractFileExtractor
 			String value = entry.getValue();
 			if (uri.equals(NID3.leadArtist))
 			{
-				ID3Util.checkArtist(model, value, track);
+				ID3Util.checkArtist(model, value, resourceMap
+						.get(ID3Util.TRACK));
 				continue;
 			}
 			else if (uri.equals(NID3.albumTitle))
 			{
-				ID3Util.checkRecord(model, value, musicAlbum, track);
+				ID3Util.addRecordTitle(model, value, resourceMap
+						.get(ID3Util.MUSICALBUM), resourceMap
+						.get(ID3Util.TRACK));
 				continue;
 			}
 			else if (uri.equals(NID3.recordingYear))
@@ -292,30 +303,22 @@ public class MP3FileExtractor extends AbstractFileExtractor
 					int recordingYear = Integer.parseInt(value);
 					if ((recordingYear > 0))
 					{
-						if (!model.contains(ModelUtil.createStatement(model,
-								musicAlbum, MO.track, track)))
-						{
-							model.addStatement(musicAlbum, MO.track, track);
-							model.addStatement(musicAlbum, RDF.type, MO.Record);
-						}
-
-						// create release
-						Resource release = ModelUtil
-								.generateRandomResource(model);
-						model.addStatement(release, MO.record, musicAlbum);
-						model.addStatement(release, RDF.type, MO.Release);
-
-						// create release event
-						Resource releaseEvent = ModelUtil
-								.generateRandomResource(model);
-						model.addStatement(releaseEvent, MO.release, release);
-						model.addStatement(releaseEvent, RDF.type,
+						ID3Util.checkStatementSubject(model, resourceMap
+								.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+								.get(ID3Util.TRACK), MO.Record);
+						ID3Util.checkStatementSubject(model, resourceMap
+								.get(ID3Util.RELEASE), MO.record, resourceMap
+								.get(ID3Util.MUSICALBUM), MO.Release);
+						ID3Util.checkStatementSubject(model, resourceMap
+								.get(ID3Util.RELEASEEVENT), MO.release,
+								resourceMap.get(ID3Util.RELEASE),
 								MO.ReleaseEvent);
 
 						// create time instant
 						Resource releaseTime = ModelUtil
 								.generateRandomResource(model);
-						model.addStatement(releaseEvent, EVENT.time,
+						model.addStatement(resourceMap
+								.get(ID3Util.RELEASEEVENT), EVENT.time,
 								releaseTime);
 						model.addStatement(releaseTime, RDF.type, TIME.Instant);
 						try
@@ -347,10 +350,10 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				{
 					// FIXME: a music genre can also be item specific
 					// (subjective, personal)
-					model.addStatement(track, MO.genre, GenreUri
-							.getGenreByIntId(
+					model.addStatement(resourceMap.get(ID3Util.TRACK),
+							MO.genre, GenreUri.getGenreByIntId(
 									Genre.getGenreByName(value).getId())
-							.getUri());
+									.getUri());
 				}
 				else
 				{
@@ -359,8 +362,9 @@ public class MP3FileExtractor extends AbstractFileExtractor
 					// duplicate check etc)
 					// a music genre can also be item specific (subjective,
 					// personal)
-					model.addStatement(track, MO.genre, new URIImpl(
-							Namespaces.PMKB_NS + GenreUri.GENRE_RURI + value));
+					model.addStatement(resourceMap.get(ID3Util.TRACK),
+							MO.genre, new URIImpl(Namespaces.PMKB_NS
+									+ GenreUri.GENRE_RURI + value));
 				}
 			}
 			else if (uri.equals(NID3.trackNumber))
@@ -370,8 +374,9 @@ public class MP3FileExtractor extends AbstractFileExtractor
 					int trackNumber = Integer.parseInt(value);
 					if (trackNumber > 0)
 					{
-						model.addStatement(track, MO.track_number, ModelUtil
-								.createLiteral(model, trackNumber));
+						model.addStatement(resourceMap.get(ID3Util.TRACK),
+								MO.track_number, ModelUtil.createLiteral(model,
+										trackNumber));
 					}
 				}
 				catch (NumberFormatException e)
@@ -395,8 +400,8 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				// result.add(uri, value);
 				try
 				{
-					model.addStatement(track, uri, ModelUtil.createLiteral(
-							model, value));
+					model.addStatement(resourceMap.get(ID3Util.TRACK), uri,
+							ModelUtil.createLiteral(model, value));
 				}
 				catch (ModelRuntimeException e)
 				{

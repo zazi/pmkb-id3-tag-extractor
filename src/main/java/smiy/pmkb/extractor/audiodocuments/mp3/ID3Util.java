@@ -20,13 +20,11 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.vocabulary.RDF;
-import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.FOAF;
-import smiy.pmkb.vocabulary.FRBR;
 import smiy.pmkb.vocabulary.MO;
 
 /**
@@ -35,6 +33,18 @@ import smiy.pmkb.vocabulary.MO;
  */
 public class ID3Util
 {
+	public static final String TRACK = "track";
+	public static final String MUSICALBUM = "musicAlbum";
+	public static final String RELEASE = "release";
+	public static final String RELEASEEVENT = "releaseEvent";
+	public static final String SIGNAL = "SIGNAL";
+	public static final String MUSICALWORK = "musicalWork";
+	public static final String LYRICS = "lyrics";
+	public static final String ORIGINALSIGNAL = "originalSignal";
+	public static final String ORIGINALMUSICALMANIFESTATION = "originalMusicalManifestation";
+	public static final String ORIGINALLYRICS = "originalLyrics";
+	public static final String PERFORMANCE = "performance";
+	
 	/**
 	 * As taken from the timestamp definition published at <br/>
 	 * <br/>
@@ -100,15 +110,10 @@ public class ID3Util
 		return result.getTime();
 	}
 
-	public static void checkRecord(Model model, String value,
+	public static void addRecordTitle(Model model, String value,
 			Resource musicAlbum, Resource track)
 	{
-		if (!model.contains(ModelUtil.createStatement(model, musicAlbum,
-				MO.track, track)))
-		{
-			model.addStatement(musicAlbum, MO.track, track);
-			model.addStatement(musicAlbum, RDF.type, MO.Record);
-		}
+		checkStatementSubject(model, musicAlbum, MO.track, track, MO.Record);
 
 		try
 		{
@@ -131,24 +136,7 @@ public class ID3Util
 	{
 		// creates here a random URI for further processing (matching
 		// task)
-		Resource musicArtist = ModelUtil.generateRandomResource(model);
-		model.addStatement(track, DCTERMS.creator, musicArtist);
-		model.addStatement(musicArtist, RDF.type, MO.MusicArtist);
-		try
-		{
-			model.addStatement(musicArtist, FOAF.name, ModelUtil.createLiteral(
-					model, value));
-		}
-		catch (ModelRuntimeException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (ModelException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ID3Util.addAgent(model, track, DCTERMS.creator, MO.MusicArtist, value);
 	}
 
 	/**
@@ -232,72 +220,72 @@ public class ID3Util
 		return mediaTypeUri;
 	}
 
-	public static void checkSignal(Model model, RDFContainer result,
-			Resource signal)
+	public static void addAgent(Model model, Resource subject, URI predicate,
+			URI type, String name)
 	{
-		if (!model.contains(ModelUtil.createStatement(model, result
-				.getDescribedUri(), MO.encodes, signal)))
+		Resource agent = ModelUtil.generateRandomResource(model);
+		model.addStatement(subject, predicate, agent);
+		model.addStatement(agent, RDF.type, type);
+		try
 		{
-			model.addStatement(result.getDescribedUri(), MO.encodes, signal);
-			model.addStatement(signal, RDF.type, MO.Signal);
+			model.addStatement(agent, FOAF.name, ModelUtil.createLiteral(model,
+					name));
+		}
+		catch (ModelRuntimeException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ModelException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	public static void checkLyrics(Model model, Resource track, Resource lyrics)
+	public static void checkCount(Model model, Resource subject, URI predicate,
+			int count)
 	{
-		if (!model.contains(ModelUtil.createStatement(model, track,
-				MO.publication_of, lyrics)))
+		try
 		{
-			model.addStatement(track, MO.publication_of, lyrics);
-			model.addStatement(lyrics, RDF.type, MO.Lyrics);
+			if (!model.contains(ModelUtil.createStatement(model, subject,
+					predicate, ModelUtil.createLiteral(model, count))))
+			{
+				model.addStatement(subject, predicate, ModelUtil.createLiteral(
+						model, count));
+			}
+		}
+		catch (ModelRuntimeException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ModelException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	public static void checkOriginalSignal(Model model, Resource signal,
-			Resource originalSignal)
+	public static void checkStatementObject(Model model, Resource subject,
+			URI predicate, Resource object, URI type)
 	{
-		if (!model.contains(ModelUtil.createStatement(model, signal,
-				MO.derived_from, originalSignal)))
+		if (!model.contains(ModelUtil.createStatement(model, subject,
+				predicate, object)))
 		{
-			model.addStatement(signal, MO.derived_from, originalSignal);
-			model.addStatement(originalSignal, RDF.type, MO.Signal);
+			model.addStatement(subject, predicate, object);
+			model.addStatement(object, RDF.type, type);
 		}
 	}
 
-	public static void checkOriginalMusicalManifestation(Model model,
-			Resource originalSignal, Resource originalMusicalManifestation)
+	public static void checkStatementSubject(Model model, Resource subject,
+			URI predicate, Resource object, URI type)
 	{
-		if (!model.contains(ModelUtil.createStatement(model, originalSignal,
-				FRBR.embodiment, originalMusicalManifestation)))
+		if (!model.contains(ModelUtil.createStatement(model, subject,
+				predicate, object)))
 		{
-			model.addStatement(originalSignal, FRBR.embodiment,
-					originalMusicalManifestation);
-			model.addStatement(originalMusicalManifestation, RDF.type,
-					MO.MusicalManifestation);
-		}
-	}
-
-	public static void checkOriginalLyrics(Model model,
-			Resource originalMusicalManifestation, Resource originalLyrics)
-	{
-		if (!model.contains(ModelUtil
-				.createStatement(model, originalMusicalManifestation,
-						MO.publication_of, originalLyrics)))
-		{
-			model.addStatement(originalMusicalManifestation, MO.publication_of,
-					originalLyrics);
-			model.addStatement(originalLyrics, RDF.type, MO.Lyrics);
-		}
-	}
-
-	public static void checkPerformance(Model model, Resource signal,
-			Resource performance)
-	{
-		if (!model.contains(ModelUtil.createStatement(model, performance,
-				MO.recorded_as, signal)))
-		{
-			model.addStatement(performance, MO.recorded_as, signal);
-			model.addStatement(performance, RDF.type, MO.Performance);
+			model.addStatement(subject, predicate, object);
+			model.addStatement(subject, RDF.type, type);
 		}
 	}
 }
