@@ -253,33 +253,10 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
 			FrameBodyTALB albumTitleFB = (FrameBodyTALB) body;
-
 			Model model = result.getModel();
-			if (!model.contains(ModelUtil.createStatement(model, musicAlbum,
-					MO.track, track)))
-			{
-				model.addStatement(musicAlbum, MO.track, result
-						.getDescribedUri());
-				model.addStatement(musicAlbum, RDF.type, MO.Record);
-			}
 
-			try
-			{
-				model
-						.addStatement(musicAlbum, DC.title, ModelUtil
-								.createLiteral(model, albumTitleFB
-										.getFirstTextValue()));
-			}
-			catch (ModelRuntimeException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch (ModelException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			ID3Util.checkRecord(model, albumTitleFB.getFirstTextValue(),
+					musicAlbum, track);
 
 			id3v1props.remove(NID3.albumTitle);
 		}
@@ -293,7 +270,7 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 
-			checkSignal(model, result);
+			ID3Util.checkSignal(model, result, signal);
 
 			// should be an integer stored as string and now transformed to a
 			// float value
@@ -406,7 +383,7 @@ public enum FrameIdentifier
 			FrameBodyTEXT lyricistFB = (FrameBodyTEXT) body;
 			Model model = result.getModel();
 
-			checkLyrics(model, result);
+			ID3Util.checkLyrics(model, track, lyrics);
 
 			Resource lyricist = ModelUtil.generateRandomResource(model);
 			model.addStatement(lyrics, DCTERMS.creator, lyricist);
@@ -451,7 +428,7 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				checkSignal(model, result);
+				ID3Util.checkSignal(model, result, signal);
 
 				model.addStatement(signal, MO.key, KeyUri.getKeyByStringId(
 						keyFB.getFirstTextValue()).getUri());
@@ -468,7 +445,7 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				checkLyrics(model, result);
+				ID3Util.checkLyrics(model, track, lyrics);
 
 				// TODO: we have to store the ISO-639-2 based language tag(s) as
 				// language tag of the lyrics string; that means, we first need
@@ -487,7 +464,7 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 
-			checkSignal(model, result);
+			ID3Util.checkSignal(model, result, signal);
 
 			Resource timeInterval = ModelUtil.generateRandomResource(model);
 			model.addStatement(timeInterval, RDF.type,
@@ -503,16 +480,17 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			if (getMediaType((AbstractFrameBodyTextInfo) body) != null)
+			if (ID3Util.getMediaType((AbstractFrameBodyTextInfo) body) != null)
 			{
 				Model model = result.getModel();
 
-				checkSignal(model, result);
-				checkOriginalSignal(model, result);
-				checkOriginalMusicalManifestation(model, result);
+				ID3Util.checkSignal(model, result, signal);
+				ID3Util.checkOriginalSignal(model, signal, originalSignal);
+				ID3Util.checkOriginalMusicalManifestation(model,
+						originalSignal, originalMusicalManifestation);
 
 				model.addStatement(originalMusicalManifestation, MO.media_type,
-						getMediaType((AbstractFrameBodyTextInfo) body));
+						ID3Util.getMediaType((AbstractFrameBodyTextInfo) body));
 			}
 		}
 	}, // describes from which media the sound originated
@@ -524,9 +502,10 @@ public enum FrameIdentifier
 			Model model = result.getModel();
 			FrameBodyTOAL originalTitleFB = (FrameBodyTOAL) body;
 
-			checkSignal(model, result);
-			checkOriginalSignal(model, result);
-			checkOriginalMusicalManifestation(model, result);
+			ID3Util.checkSignal(model, result, signal);
+			ID3Util.checkOriginalSignal(model, signal, originalSignal);
+			ID3Util.checkOriginalMusicalManifestation(model, originalSignal,
+					originalMusicalManifestation);
 
 			model.addStatement(originalMusicalManifestation, DC.title,
 					ModelUtil.createLiteral(model, originalTitleFB
@@ -552,10 +531,12 @@ public enum FrameIdentifier
 			FrameBodyTOLY originalLyricistFB = (FrameBodyTOLY) body;
 			Model model = result.getModel();
 
-			checkSignal(model, result);
-			checkOriginalSignal(model, result);
-			checkOriginalMusicalManifestation(model, result);
-			checkOriginalLyrics(model, result);
+			ID3Util.checkSignal(model, result, signal);
+			ID3Util.checkOriginalSignal(model, signal, originalSignal);
+			ID3Util.checkOriginalMusicalManifestation(model, originalSignal,
+					originalMusicalManifestation);
+			ID3Util.checkOriginalLyrics(model, originalMusicalManifestation,
+					originalLyrics);
 
 			Resource originalLyricist = ModelUtil.generateRandomResource(model);
 			model.addStatement(originalLyrics, DCTERMS.creator,
@@ -574,13 +555,17 @@ public enum FrameIdentifier
 			FrameBodyTOPE originalArtistFB = (FrameBodyTOPE) body;
 			Model model = result.getModel();
 
-			checkSignal(model, result);
-			checkOriginalSignal(model, result);
+			ID3Util.checkSignal(model, result, signal);
+			ID3Util.checkOriginalSignal(model, signal, originalSignal);
 
-			// FIXME: handle multiple artists performers ("/" separated)
+			// FIXME: handle multiple artists/performers ("/" separated)
 			Resource originalArtist = ModelUtil.generateRandomResource(model);
 			model.addStatement(originalSignal, DC.creator, originalArtist);
 			model.addStatement(originalArtist, RDF.type, MO.MusicArtist);
+			model
+					.addStatement(originalArtist, FOAF.name, ModelUtil
+							.createLiteral(model, originalArtistFB
+									.getFirstTextValue()));
 		}
 	},
 	TOWN("File owner/licensee", true)
@@ -595,6 +580,8 @@ public enum FrameIdentifier
 			// frbr:owner (on item level (?))
 			model.addStatement(result.getDescribedUri(), FRBR.owner, owner);
 			model.addStatement(owner, RDF.type, FOAF.Person);
+			model.addStatement(owner, FOAF.name, ModelUtil.createLiteral(model,
+					ownerFB.getFirstTextValue()));
 		}
 	},
 	TPE1("Lead performer(s)/Soloist(s)", true)
@@ -602,8 +589,12 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			addSimpleContact(NID3.leadArtist, ((FrameBodyTPE1) body)
-					.getFirstTextValue(), result);
+			FrameBodyTPE1 soloistFB = (FrameBodyTPE1) body;
+			Model model = result.getModel();
+
+			// FIXME: handle multiple soloists/lead performers ("/" separated)
+			// and mark them somehow explicitly
+			ID3Util.checkArtist(model, soloistFB.getFirstTextValue(), track);
 			id3v1props.remove(NID3.leadArtist);
 		}
 	},
@@ -612,8 +603,13 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			addSimpleContact(NID3.backgroundArtist, ((FrameBodyTPE2) body)
-					.getFirstTextValue(), result);
+			FrameBodyTPE2 bandFB = (FrameBodyTPE2) body;
+			Model model = result.getModel();
+
+			// FIXME: handle multiple bands/orchestras/accompaniments ("/"
+			// separated ?)
+			// and mark them somehow explicitly
+			ID3Util.checkArtist(model, bandFB.getFirstTextValue(), track);
 		}
 	},
 	TPE3("Conductor/performer refinement", true)
@@ -621,8 +617,16 @@ public enum FrameIdentifier
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result)
 		{
-			addSimpleContact(NID3.conductor, ((FrameBodyTPE3) body)
-					.getFirstTextValue(), result);
+			FrameBodyTPE3 conductorFB = (FrameBodyTPE3) body;
+			Model model = result.getModel();
+
+			ID3Util.checkPerformance(model, signal, performance);
+
+			Resource conductor = ModelUtil.generateRandomResource(model);
+			model.addStatement(performance, MO.conductor, conductor);
+			model.addStatement(conductor, RDF.type, FOAF.Person);
+			model.addStatement(conductor, FOAF.name, ModelUtil.createLiteral(
+					model, conductorFB.getFirstTextValue()));
 		}
 	},
 	TPE4("Interpreted, remixed, or otherwise modified by", true)
@@ -1044,6 +1048,7 @@ public enum FrameIdentifier
 	private static Resource originalSignal;
 	private static Resource originalMusicalManifestation;
 	private static Resource originalLyrics;
+	private static Resource performance;
 
 	FrameIdentifier(String name, boolean isSupported)
 	{
@@ -1151,194 +1156,19 @@ public enum FrameIdentifier
 		originalLyrics = ol;
 	}
 
+	public Resource getPerformance()
+	{
+		return performance;
+	}
+
+	public void setPerformance(Resource p)
+	{
+		performance = p;
+	}
+
 	public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 			HashMap<URI, String> id3v1props, RDFContainer result)
 	{
 		// the default behavior for unsupported frames is to do nothing
-	}
-
-	/**
-	 * As taken from the timestamp definition published at <br/>
-	 * <br/>
-	 * http://www.id3.org/id3v2.4.0-structure <br/>
-	 * <br/>
-	 * 
-	 * <pre>
-	 * The timestamp fields are based on a subset of ISO 8601. When being as
-	 *    precise as possible the format of a time string is
-	 *    yyyy-MM-ddTHH:mm:ss (year, "-", month, "-", day, "T", hour (out of
-	 *    24), ":", minutes, ":", seconds), but the precision may be reduced by
-	 *    removing as many time indicators as wanted. Hence valid timestamps
-	 *    are
-	 *    yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH, yyyy-MM-ddTHH:mm and
-	 *    yyyy-MM-ddTHH:mm:ss. All time stamps are UTC. For durations, use
-	 *    the slash character as described in 8601, and for multiple non-
-	 *    contiguous dates, use multiple strings, if allowed by the frame
-	 *    definition.
-	 * </pre>
-	 * 
-	 * @param timestamp
-	 * @return a {@link Date} instance corresponding to the given timestamp.
-	 */
-	protected Date id3v24timestampToDate(String timestamp)
-	{
-		// the Javadocs state that if the ID is not recognized, GMT is returned,
-		// we need GMT
-		GregorianCalendar result = new GregorianCalendar(TimeZone
-				.getTimeZone("asdfasdfasd"));
-		result.set(0, 0, 1, 0, 0, 0);
-		// let's start by trying to set the year, without any further ado
-		result.set(Calendar.YEAR, Integer.parseInt(timestamp.substring(0, 4)));
-		if (timestamp.length() == 4)
-		{
-			return result.getTime();
-		}
-		// months in a GregorianCalendar are 0-based, that's why we subtract 1
-		result.set(Calendar.MONTH,
-				Integer.parseInt(timestamp.substring(5, 2)) - 1);
-		if (timestamp.length() == 7)
-		{
-			return result.getTime();
-		}
-		result.set(Calendar.DAY_OF_MONTH, Integer.parseInt(timestamp.substring(
-				8, 2)));
-		if (timestamp.length() == 10)
-		{
-			return result.getTime();
-		}
-		result.set(Calendar.HOUR, Integer.parseInt(timestamp.substring(11, 2)));
-		if (timestamp.length() == 13)
-		{
-			return result.getTime();
-		}
-		result.set(Calendar.MINUTE, Integer
-				.parseInt(timestamp.substring(14, 2)));
-		if (timestamp.length() == 16)
-		{
-			return result.getTime();
-		}
-		result.set(Calendar.SECOND, Integer
-				.parseInt(timestamp.substring(17, 2)));
-		return result.getTime();
-	}
-
-	/**
-	 * Tries to resolve an ID3 tag media type description to an URI.
-	 * 
-	 * TODO: add exceptions, especially NullPointerException
-	 * 
-	 * @param body
-	 *            - the frame that contains a media type description
-	 * @return - the URI of the specific media type
-	 */
-	protected URI getMediaType(AbstractFrameBodyTextInfo body)
-	{
-		String mediaType = body.getFirstTextValue();
-		String mediaTypeShortened = "";
-
-		if (mediaType.length() > 3)
-		{
-			mediaTypeShortened = mediaType.substring(0, 2);
-		}
-		else
-		{
-			mediaTypeShortened = mediaType;
-		}
-
-		if (MediaTypeUri.getKeyByStringId(mediaTypeShortened) != null)
-		{
-			MediaTypeUri mediaTypeUri = MediaTypeUri
-					.getKeyByStringId(mediaTypeShortened);
-
-			// handle specific video media types (VHS, S-VHS, Betamax)
-			if (mediaTypeUri == MediaTypeUri.VID)
-			{
-				String mediaTypeShortenedEnd = mediaType.substring(mediaType
-						.length() - 3, mediaType.length() - 1);
-
-				if (MediaTypeUri.getKeyByStringId(mediaTypeShortenedEnd) != null)
-				{
-					return MediaTypeUri.getKeyByStringId(mediaTypeShortenedEnd)
-							.getUri();
-				}
-			}
-			else
-			{
-				return mediaTypeUri.getUri();
-			}
-		}
-		// handle specific other analogue media types
-		else if (mediaTypeShortened.equals("ANA"))
-		{
-			if (mediaType.length() >= 7)
-			{
-				mediaTypeShortened = mediaType.substring(0, 6);
-
-				if (MediaTypeUri.getKeyByStringId(mediaTypeShortened) != null)
-				{
-					return MediaTypeUri.getKeyByStringId(mediaTypeShortened)
-							.getUri();
-				}
-			}
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	protected void checkSignal(Model model, RDFContainer result)
-	{
-		if (!model.contains(ModelUtil.createStatement(model, result
-				.getDescribedUri(), MO.encodes, signal)))
-		{
-			model.addStatement(result.getDescribedUri(), MO.encodes, signal);
-			model.addStatement(signal, RDF.type, MO.Signal);
-		}
-	}
-
-	protected void checkLyrics(Model model, RDFContainer result)
-	{
-		if (!model.contains(ModelUtil.createStatement(model, track,
-				MO.publication_of, lyrics)))
-		{
-			model.addStatement(track, MO.publication_of, lyrics);
-			model.addStatement(lyrics, RDF.type, MO.Lyrics);
-		}
-	}
-
-	protected void checkOriginalSignal(Model model, RDFContainer result)
-	{
-		if (!model.contains(ModelUtil.createStatement(model, signal,
-				MO.derived_from, originalSignal)))
-		{
-			model.addStatement(signal, MO.derived_from, originalSignal);
-			model.addStatement(originalSignal, RDF.type, MO.Signal);
-		}
-	}
-
-	protected void checkOriginalMusicalManifestation(Model model,
-			RDFContainer result)
-	{
-		if (!model.contains(ModelUtil.createStatement(model, originalSignal,
-				FRBR.embodiment, originalMusicalManifestation)))
-		{
-			model.addStatement(originalSignal, FRBR.embodiment,
-					originalMusicalManifestation);
-			model.addStatement(originalMusicalManifestation, RDF.type,
-					MO.MusicalManifestation);
-		}
-	}
-
-	protected void checkOriginalLyrics(Model model, RDFContainer result)
-	{
-		if (!model.contains(ModelUtil
-				.createStatement(model, originalMusicalManifestation,
-						MO.publication_of, originalLyrics)))
-		{
-			model.addStatement(originalMusicalManifestation, MO.publication_of,
-					originalLyrics);
-			model.addStatement(originalLyrics, RDF.type, MO.Lyrics);
-		}
 	}
 }

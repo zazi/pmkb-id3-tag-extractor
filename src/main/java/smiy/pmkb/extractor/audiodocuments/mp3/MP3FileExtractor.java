@@ -213,6 +213,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource originalSignal = ModelUtil.generateRandomResource(model);
 		Resource originalMusicalManifestation = ModelUtil.generateRandomResource(model);
 		Resource originalLyrics = ModelUtil.generateRandomResource(model);
+		Resource performance = ModelUtil.generateRandomResource(model);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
@@ -234,6 +235,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				frameIdentifier.setOriginalSignal(originalSignal);
 				frameIdentifier.setOriginalMusicalManifestation(originalMusicalManifestation);
 				frameIdentifier.setOriginalLyrics(originalLyrics);
+				frameIdentifier.setPerformance(performance);
 				frameIdentifier.process(body, id3v2, id3v1FieldHashMap, result);
 			}
 			catch (Exception e)
@@ -275,52 +277,12 @@ public class MP3FileExtractor extends AbstractFileExtractor
 			String value = entry.getValue();
 			if (uri.equals(NID3.leadArtist))
 			{
-				// creates here a random URI for further processing (matching
-				// task)
-				Resource musicArtist = ModelUtil.generateRandomResource(model);
-				model.addStatement(track, DCTERMS.creator, musicArtist);
-				model.addStatement(musicArtist, RDF.type, MO.MusicArtist);
-				try
-				{
-					model.addStatement(musicArtist, FOAF.name, ModelUtil
-							.createLiteral(model, value));
-				}
-				catch (ModelRuntimeException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				catch (ModelException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				ID3Util.checkArtist(model, value, track);
 				continue;
 			}
 			else if (uri.equals(NID3.albumTitle))
 			{
-				if (!model.contains(ModelUtil.createStatement(model,
-						musicAlbum, MO.track, track)))
-				{
-					model.addStatement(musicAlbum, MO.track, track);
-					model.addStatement(musicAlbum, RDF.type, MO.Record);
-				}
-
-				try
-				{
-					model.addStatement(musicAlbum, DC.title, ModelUtil
-							.createLiteral(model, value));
-				}
-				catch (ModelRuntimeException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				catch (ModelException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				ID3Util.checkRecord(model, value, musicAlbum, track);
 				continue;
 			}
 			else if (uri.equals(NID3.recordingYear))
