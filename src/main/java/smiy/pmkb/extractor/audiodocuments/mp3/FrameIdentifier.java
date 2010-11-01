@@ -92,7 +92,9 @@ import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.FRBR;
 import smiy.pmkb.vocabulary.MO;
+import smiy.pmkb.vocabulary.MT;
 import smiy.pmkb.vocabulary.PBO;
+import smiy.pmkb.vocabulary.PO;
 import smiy.pmkb.vocabulary.TL;
 
 /**
@@ -774,13 +776,16 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			FrameBodyTRSN internetRadioStationFB = (FrameBodyTRSN) body;
+			FrameBodyTRSN internetRadioStationNameFB = (FrameBodyTRSN) body;
 			Model model = result.getModel();
 
-			// change item type to MO:Stream
-			model.removeStatement(result.getDescribedUri(), RDF.type,
-					MO.AudioFile);
-			model.addStatement(result.getDescribedUri(), RDF.type, MO.Stream);
+			ID3Util.checkStream(model, result, resourceMap);
+			ID3Util.prepareServiceOutletConnection(model, resourceMap);
+
+			// add internet radion station name
+			model.addStatement(resourceMap.get(ID3Util.OUTLET), DC.title,
+					ModelUtil.createLiteral(model, internetRadioStationNameFB
+							.getFirstTextValue()));
 		}
 	},
 	TRSO("Internet radio station owner", true)
@@ -789,8 +794,20 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			addSimpleContact(NID3.internetRadioStationOwner,
-					((FrameBodyTRSO) body).getFirstTextValue(), result);
+			FrameBodyTRSO internetRadioStationOwnerFB = (FrameBodyTRSO) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStream(model, result, resourceMap);
+			ID3Util.prepareServiceOutletConnection(model, resourceMap);
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SERVICE), PO.outlet, resourceMap
+					.get(ID3Util.OUTLET), PO.Service);
+
+			// add broadcaster
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.SERVICE),
+					PO.broadcaster, PO.Broadcaster, internetRadioStationOwnerFB
+							.getFirstTextValue());
 		}
 	},
 	TSRC("ISRC (international standard recording code)", true)

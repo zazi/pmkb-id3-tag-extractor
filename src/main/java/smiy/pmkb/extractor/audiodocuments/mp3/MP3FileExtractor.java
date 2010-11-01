@@ -221,6 +221,14 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				.generateRandomResource(model);
 		Resource originalLyrics = ModelUtil.generateRandomResource(model);
 		Resource performance = ModelUtil.generateRandomResource(model);
+		Resource musicSegment = ModelUtil.generateRandomResource(model);
+		Resource segmentInterval = ModelUtil.generateRandomResource(model);
+		Resource episodeTimeline = ModelUtil.generateRandomResource(model);
+		Resource versionInterval = ModelUtil.generateRandomResource(model);
+		Resource episodeVersion = ModelUtil.generateRandomResource(model);
+		Resource broadcast = ModelUtil.generateRandomResource(model);
+		Resource outlet = ModelUtil.generateRandomResource(model);
+		Resource service = ModelUtil.generateRandomResource(model);
 
 		resourceMap.put(ID3Util.SIGNAL, signal);
 		resourceMap.put(ID3Util.MUSICALWORK, musicalWork);
@@ -230,6 +238,14 @@ public class MP3FileExtractor extends AbstractFileExtractor
 				originalMusicalManifestation);
 		resourceMap.put(ID3Util.ORIGINALLYRICS, originalLyrics);
 		resourceMap.put(ID3Util.PERFORMANCE, performance);
+		resourceMap.put(ID3Util.MUSICSEGMENT, musicSegment);
+		resourceMap.put(ID3Util.SEGMENTINTERVAL, segmentInterval);
+		resourceMap.put(ID3Util.EPISODETIMELINE, episodeTimeline);
+		resourceMap.put(ID3Util.VERSIONINTERVAL, versionInterval);
+		resourceMap.put(ID3Util.EPISODEVERSION, episodeVersion);
+		resourceMap.put(ID3Util.BROADCAST, broadcast);
+		resourceMap.put(ID3Util.OUTLET, outlet);
+		resourceMap.put(ID3Util.SERVICE, service);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 

@@ -11,6 +11,7 @@ package smiy.pmkb.extractor.audiodocuments.mp3;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
@@ -20,12 +21,16 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.vocabulary.RDF;
+import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.MO;
+import smiy.pmkb.vocabulary.MT;
+import smiy.pmkb.vocabulary.PO;
+import smiy.pmkb.vocabulary.TL;
 
 /**
  * This class contains utility methods that facilitate the generation of various
@@ -44,7 +49,15 @@ public class ID3Util
 	public static final String ORIGINALMUSICALMANIFESTATION = "originalMusicalManifestation";
 	public static final String ORIGINALLYRICS = "originalLyrics";
 	public static final String PERFORMANCE = "performance";
-	
+	public static final String MUSICSEGMENT = "musicSegment";
+	public static final String SEGMENTINTERVAL = "segmentInterval";
+	public static final String EPISODETIMELINE = "episodeTimeline";
+	public static final String VERSIONINTERVAL = "versionInterval";
+	public static final String EPISODEVERSION = "episodeVersion";
+	public static final String BROADCAST = "broadcast";
+	public static final String OUTLET = "outlet";
+	public static final String SERVICE = "service";
+
 	/**
 	 * As taken from the timestamp definition published at <br/>
 	 * <br/>
@@ -287,5 +300,50 @@ public class ID3Util
 			model.addStatement(subject, predicate, object);
 			model.addStatement(subject, RDF.type, type);
 		}
+	}
+
+	public static void checkStream(Model model, RDFContainer result,
+			HashMap<String, Resource> resourceMap)
+	{
+		if (model.contains(ModelUtil.createStatement(model, result
+				.getDescribedUri(), RDF.type, MO.AudioFile)))
+		{
+			// change item type to MO:Stream
+			model.removeStatement(result.getDescribedUri(), RDF.type,
+					MO.AudioFile);
+			model.addStatement(result.getDescribedUri(), RDF.type, MO.Stream);
+
+			// add stream media type on manifestation level (?)
+			model.addStatement(resourceMap.get(ID3Util.TRACK), MO.media_type,
+					MT.Stream);
+		}
+	}
+
+	public static void prepareServiceOutletConnection(Model model,
+			HashMap<String, Resource> resourceMap)
+	{
+		// prepare service outlet connection
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.MUSICSEGMENT), PO.track, resourceMap
+				.get(ID3Util.TRACK), PO.MusicSegment);
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.MUSICSEGMENT), PO.time, resourceMap
+				.get(ID3Util.SEGMENTINTERVAL),
+				smiy.pmkb.vocabulary.TIME.Interval);
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.SEGMENTINTERVAL), TL.timeline, resourceMap
+				.get(ID3Util.EPISODETIMELINE), TL.TimeLine);
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.VERSIONINTERVAL), TL.timeline, resourceMap
+				.get(ID3Util.EPISODETIMELINE),
+				smiy.pmkb.vocabulary.TIME.Interval);
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.EPISODEVERSION), PO.time, resourceMap
+				.get(ID3Util.VERSIONINTERVAL), PO.Version);
+		ID3Util.checkStatementSubject(model,
+				resourceMap.get(ID3Util.BROADCAST), PO.broadcast_of,
+				resourceMap.get(ID3Util.EPISODEVERSION), PO.Broadcast);
+		ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.BROADCAST),
+				PO.broadcast_on, resourceMap.get(ID3Util.OUTLET), PO.Outlet);
 	}
 }
