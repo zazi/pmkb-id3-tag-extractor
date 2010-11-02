@@ -88,6 +88,7 @@ import org.semanticdesktop.aperture.vocabulary.NIE;
 
 import smiy.pmkb.util.Namespaces;
 import smiy.pmkb.vocabulary.AO;
+import smiy.pmkb.vocabulary.BIBO;
 import smiy.pmkb.vocabulary.CO;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
@@ -862,26 +863,28 @@ public enum FrameIdentifier
 			userDefinedDescription.process(body, result, resourceMap);
 		}
 	},
-	UFID("Unique file identifier", true)
-	{
-		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result,
-				HashMap<String, Resource> resourceMap)
-		{
-			result.add(NID3.uniqueFileIdentifier, ((FrameBodyUFID) body)
-					.getOwner()
-					+ "/" + ((FrameBodyUFID) body).getIdentifier());
-		}
-	},
-	USER("Terms of use", false), // unsupported in NID3
+	UFID("Unique file identifier", false), // FIXME: currently not supported by
+	// PMKB
+	USER("Terms of use", false), // contains a brief description of the terms of
+	// use and ownership of the file; FIXME:
+	// currently not supported by PMKB
 	USLT("Unsynchronised lyric/text transcription", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.unsynchronizedTextContent, ((FrameBodyUSLT) body)
-					.getLyric());
+			FrameBodyUSLT lyricsFB = (FrameBodyUSLT) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					MO.publication_of, resourceMap.get(ID3Util.LYRICS),
+					MO.Lyrics);
+
+			// FIXME: what about lyricsLanguage from TLAN? how to handle
+			// multiple lyric texts?
+			model.addStatement(resourceMap.get(ID3Util.LYRICS), MO.text,
+					lyricsFB.getFirstTextValue(), lyricsFB.getLanguage());
 		}
 	},
 	WCOM("Commercial information", true)
@@ -890,21 +893,32 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWCOM) body).getUrlLink());
-			result.add(NID3.commercialInformationURL, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWCOM commercialInformationFB = (FrameBodyWCOM) body;
+			Model model = result.getModel();
+
+			// a URL pointing at a webpage with information such as where the
+			// album can be bought
+			Resource commercialInformation = model
+					.createURI(commercialInformationFB.getUrlLink());
+			model.addStatement(commercialInformation, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.TRACK));
+			model.addStatement(commercialInformation, RDF.type, BIBO.Document);
 		}
 	},
 	WCOP("Copyright/Legal information", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result)
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWCOP) body).getUrlLink());
-			result.add(NID3.copyrightInformationURL, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWCOP copyrightFB = (FrameBodyWCOP) body;
+			Model model = result.getModel();
+
+			// use mo:licence for the moment
+			Resource copyright = model.createURI(copyrightFB.getUrlLink());
+			model.addStatement(resourceMap.get(ID3Util.TRACK), MO.licence,
+					copyright);
+			model.addStatement(copyright, RDF.type, BIBO.Document);
 		}
 	},
 	WOAF("Official audio file webpage", true)
@@ -913,10 +927,15 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWOAF) body).getUrlLink());
-			result.add(NID3.officialFileWebpage, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWOAF fileSiteFB = (FrameBodyWOAF) body;
+			Model model = result.getModel();
+
+			// FIXME: a file (!) specific webpage? - currently track specific
+			// webpage
+			Resource fileSite = model.createURI(fileSiteFB.getUrlLink());
+			model.addStatement(fileSite, FOAF.primaryTopic, resourceMap
+					.get(ID3Util.TRACK));
+			model.addStatement(fileSite, RDF.type, BIBO.Document);
 		}
 	},
 	WOAR("Official artist/performer webpage", true)
@@ -930,7 +949,8 @@ public enum FrameIdentifier
 			result.add(NID3.officialArtistWebpage, resource);
 			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
 		}
-	},
+	}, // very unspecific, because this frame can also exist multiple times, so
+		// how should one associate the correct artist to the correct webpage?
 	WOAS("Official audio source webpage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
