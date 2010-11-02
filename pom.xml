@@ -82,7 +82,7 @@
 					</vocabulary>
 					<vocabulary>
 						<ontology>${vocabulary.input.dir}/time.owl</ontology>
-						<namespace>http://www.w3.org/2006/time</namespace>
+						<namespace>http://www.w3.org/2006/time#</namespace>
 						<javaClass>${vocabulary.java.package}.TIME</javaClass>
 						<outputDir>${vocabulary.output.dir}</outputDir>
 						<namespaceStrict>true</namespaceStrict>
@@ -138,8 +138,22 @@
 					</vocabulary>
 					<vocabulary>
 						<ontology>${vocabulary.input.dir}/wgs84_pos.rdfs</ontology>
-						<namespace>http://www.w3.org/2003/01/geo/wgs84_pos</namespace>
+						<namespace>http://www.w3.org/2003/01/geo/wgs84_pos#</namespace>
 						<javaClass>${vocabulary.java.package}.WGS84</javaClass>
+						<outputDir>${vocabulary.output.dir}</outputDir>
+						<namespaceStrict>true</namespaceStrict>
+					</vocabulary>
+					<vocabulary>
+						<ontology>${vocabulary.input.dir}/tags.owl</ontology>
+						<namespace>http://www.holygoat.co.uk/owl/redwood/0.1/tags/</namespace>
+						<javaClass>${vocabulary.java.package}.TAGS</javaClass>
+						<outputDir>${vocabulary.output.dir}</outputDir>
+						<namespaceStrict>true</namespaceStrict>
+					</vocabulary>
+					<vocabulary>
+						<ontology>${vocabulary.input.dir}/ao.owl</ontology>
+						<namespace>http://purl.org/ontology/ao/core#</namespace>
+						<javaClass>${vocabulary.java.package}.AO</javaClass>
 						<outputDir>${vocabulary.output.dir}</outputDir>
 						<namespaceStrict>true</namespaceStrict>
 					</vocabulary>

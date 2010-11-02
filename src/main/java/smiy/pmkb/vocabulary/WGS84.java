@@ -13,9 +13,9 @@ import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.semanticdesktop.aperture.util.ResourceUtil;
 /**
- * Vocabulary File. Created by org.semanticdesktop.aperture.vocabulary.VocabularyWriter on Mon Nov 01 23:34:12 CET 2010
+ * Vocabulary File. Created by org.semanticdesktop.aperture.vocabulary.VocabularyWriter on Tue Nov 02 18:53:56 CET 2010
  * input file: /src/main/resources/smiy/pmkb/vocabulary/wgs84_pos.rdfs
- * namespace: http://www.w3.org/2003/01/geo/wgs84_pos
+ * namespace: http://www.w3.org/2003/01/geo/wgs84_pos#
  */
 public class WGS84 {
 
@@ -41,7 +41,7 @@ public class WGS84 {
     }
 
     /** The namespace for WGS84 */
-    public static final URI NS_WGS84 = new URIImpl("http://www.w3.org/2003/01/geo/wgs84_pos");
+    public static final URI NS_WGS84 = new URIImpl("http://www.w3.org/2003/01/geo/wgs84_pos#");
     /**
      * Type: Class <br/>
      * Label: SpatialThing  <br/>

@@ -41,6 +41,7 @@ import org.jaudiotagger.tag.id3.framebody.FrameBodyTKEY;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTLAN;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTLEN;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTMED;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTMOO;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTOAL;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTOFN;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTOLY;
@@ -86,6 +87,7 @@ import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 import org.semanticdesktop.aperture.vocabulary.NIE;
 
 import smiy.pmkb.util.Namespaces;
+import smiy.pmkb.vocabulary.AO;
 import smiy.pmkb.vocabulary.CO;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
@@ -266,9 +268,12 @@ public enum FrameIdentifier
 			FrameBodyTALB albumTitleFB = (FrameBodyTALB) body;
 			Model model = result.getModel();
 
-			ID3Util.addRecordTitle(model, albumTitleFB.getFirstTextValue(),
-					resourceMap.get(ID3Util.MUSICALBUM), resourceMap
-							.get(ID3Util.TRACK));
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+			ID3Util.addStringLiteral(model,
+					resourceMap.get(ID3Util.MUSICALBUM), DC.title, albumTitleFB
+							.getFirstTextValue());
 
 			id3v1props.remove(NID3.albumTitle);
 		}
@@ -283,14 +288,8 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 
-			ID3Util.checkStatementObject(model, result.getDescribedUri(),
-					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
-
-			// should be an integer stored as string and now transformed to a
-			// float value
-			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.bpm,
-					ModelUtil.createLiteral(model, Float.valueOf(
-							bpmFB.getFirstTextValue()).floatValue()));
+			ID3Util.checkBPM(model, resourceMap, Float.valueOf(
+					bpmFB.getFirstTextValue()).floatValue());
 		}
 	},
 	TCOM("Composer", true)
@@ -305,15 +304,9 @@ public enum FrameIdentifier
 			// I use here currently frbr:subject, maybe a proper (inverse)
 			// relation, e.g. mo:musical_work, might be better
 			// FIXME: currently it is a work to item relation
-			if (!model.contains(ModelUtil.createStatement(model, resourceMap
+			ID3Util.checkStatementSubject(model, resourceMap
 					.get(ID3Util.MUSICALWORK), FRBR.subject, result
-					.getDescribedUri())))
-			{
-				model.addStatement(resourceMap.get(ID3Util.MUSICALWORK),
-						FRBR.subject, result.getDescribedUri());
-				model.addStatement(resourceMap.get(ID3Util.MUSICALWORK),
-						RDF.type, MO.MusicalWork);
-			}
+					.getDescribedUri(), MO.MusicalWork);
 
 			// relate the musical work to its composition event
 			Resource composition = ModelUtil.generateRandomResource(model);
@@ -349,7 +342,8 @@ public enum FrameIdentifier
 					try
 					{
 						int intValue = Integer.parseInt(integerString);
-						GenreUri genreUri = GenreUri.getGenreByIntId(intValue);
+						GenreUri genreUri = GenreUri
+								.getGenreUriByIntId(intValue);
 						if (genreUri != null)
 						{
 							// FIXME: a music genre can also be item specific
@@ -449,8 +443,10 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				ID3Util.checkStatementObject(model, result.getDescribedUri(),
-						MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+				// relate to master signal
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+						.get(ID3Util.TRACK), MO.Signal);
 
 				model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.key,
 						KeyUri.getKeyByStringId(keyFB.getFirstTextValue())
@@ -491,6 +487,7 @@ public enum FrameIdentifier
 
 			Model model = result.getModel();
 
+			// relate to audio file signal
 			ID3Util.checkStatementObject(model, result.getDescribedUri(),
 					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
 
@@ -514,8 +511,10 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				ID3Util.checkStatementObject(model, result.getDescribedUri(),
-						MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+				// relate to master signal
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+						.get(ID3Util.TRACK), MO.Signal);
 				ID3Util.checkStatementObject(model, resourceMap
 						.get(ID3Util.SIGNAL), MO.derived_from, resourceMap
 						.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
@@ -543,8 +542,10 @@ public enum FrameIdentifier
 			Model model = result.getModel();
 			FrameBodyTOAL originalTitleFB = (FrameBodyTOAL) body;
 
-			ID3Util.checkStatementObject(model, result.getDescribedUri(),
-					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
 			ID3Util.checkStatementObject(model,
 					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
 					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
@@ -580,8 +581,10 @@ public enum FrameIdentifier
 			FrameBodyTOLY originalLyricistFB = (FrameBodyTOLY) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementObject(model, result.getDescribedUri(),
-					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
 			ID3Util.checkStatementObject(model,
 					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
 					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
@@ -608,8 +611,10 @@ public enum FrameIdentifier
 			FrameBodyTOPE originalArtistFB = (FrameBodyTOPE) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementObject(model, result.getDescribedUri(),
-					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
 			ID3Util.checkStatementObject(model,
 					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
 					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
@@ -675,6 +680,10 @@ public enum FrameIdentifier
 			FrameBodyTPE3 conductorFB = (FrameBodyTPE3) body;
 			Model model = result.getModel();
 
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
 			ID3Util.checkStatementSubject(model, resourceMap
 					.get(ID3Util.PERFORMANCE), MO.recorded_as, resourceMap
 					.get(ID3Util.SIGNAL), MO.Performance);
@@ -692,8 +701,10 @@ public enum FrameIdentifier
 			FrameBodyTPE4 interpreterFB = (FrameBodyTPE4) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementObject(model, result.getDescribedUri(),
-					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
 
 			ID3Util.addAgent(model, resourceMap.get(ID3Util.SIGNAL),
 					MO.interpreter, MO.MusicArtist, interpreterFB
@@ -821,8 +832,10 @@ public enum FrameIdentifier
 			FrameBodyTSRC isrcFB = (FrameBodyTSRC) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementObject(model, result.getDescribedUri(),
-					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
 
 			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.isrc,
 					ModelUtil.createLiteral(model, isrcFB.getFirstTextValue()));
@@ -841,170 +854,12 @@ public enum FrameIdentifier
 				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
-			String description = txxx.getDescription();
 			Model model = result.getModel();
 
-			// let's handle some predefined descriptors
-			// FIXME: apply a probably more elegant mechanism here, e.g. method
-			// invocation (valueOf enum wouldn't work here)
-			if (description.equals(FrameBodyTXXX.AMAZON_ASIN))
-			{
-				// this should related to its Amazon ASIN page (?)
-				// let's take the track for the moment ;)
-				model.addStatement(resourceMap.get(ID3Util.TRACK),
-						MO.amazon_asin, txxx.getFirstTextValue());
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.BARCODE))
-			{
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-						.get(ID3Util.TRACK), MO.Record);
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.RELEASE), MO.record, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.Release);
-
-				// since we don't of which type (e.g. EAN or UPC) the barcode
-				// is, we use the general property for it
-				model
-						.addStatement(resourceMap.get(ID3Util.RELEASE),
-								MO.gtin, ModelUtil.createLiteral(model, txxx
-										.getFirstTextValue()));
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.CATALOG_NO))
-			{
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-						.get(ID3Util.TRACK), MO.Record);
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.RELEASE), MO.record, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.Release);
-
-				model.addStatement(resourceMap.get(ID3Util.RELEASE),
-						MO.catalogue_number, ModelUtil.createLiteral(model,
-								txxx.getFirstTextValue()));
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MOOD))
-			{
-
-				continue;
-			}
-			else if (description
-					.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_ARTISTID))
-			{
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-						.get(ID3Util.TRACK), MO.Record);
-				ID3Util.checkStatementObject(model, resourceMap
-						.get(ID3Util.MUSICALBUM), DCTERMS.creator, resourceMap
-						.get(ID3Util.ALBUMARTIST), MO.MusicArtist);
-
-				// add MB GUID as string
-				model.addStatement(resourceMap.get(ID3Util.ALBUMARTIST),
-						MO.musicbrainz_guid, ModelUtil.createLiteral(model,
-								txxx.getFirstTextValue()));
-
-				continue;
-			}
-			else if (description
-					.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_COUNTRY))
-			{
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-						.get(ID3Util.TRACK), MO.Record);
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.RELEASE), MO.record, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.Release);
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
-						.get(ID3Util.RELEASE), MO.ReleaseEvent);
-
-				// add country name
-				Resource country = ModelUtil.generateRandomResource(model);
-				model.addStatement(resourceMap.get(ID3Util.RELEASEEVENT),
-						EVENT.place, country);
-				model.addStatement(country, RDF.type, WGS84.SpatialThing);
-				model.addStatement(country, DC.title, ModelUtil.createLiteral(
-						model, txxx.getFirstTextValue()));
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_STATUS))
-			{
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-						.get(ID3Util.TRACK), MO.Record);
-				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.RELEASE), MO.record, resourceMap
-						.get(ID3Util.MUSICALBUM), MO.Release);
-
-				model.addStatement(resourceMap.get(ID3Util.RELEASE),
-						MO.release_status, ReleaseStatusUri.getKeyByStringId(
-								txxx.getFirstTextValue()).getUri());
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUM_TYPE))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_ALBUMID))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_DISCID))
-			{
-
-				continue;
-			}
-			else if (description
-					.equals(FrameBodyTXXX.MUSICBRAINZ_RELEASE_GROUPID))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MUSICBRAINZ_WORKID))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.MUSICIP_ID))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.PERFORMER))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.SCRIPT))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.TAGS))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.ALBUM_ARTIST))
-			{
-
-				continue;
-			}
-			else if (description.equals(FrameBodyTXXX.FBPM))
-			{
-
-				continue;
-			}
+			String description = txxx.getDescription();
+			UserDefinedDescription userDefinedDescription = UserDefinedDescription
+					.getDescriptionByStringId(description);
+			userDefinedDescription.process(body, result, resourceMap);
 		}
 	},
 	UFID("Unique file identifier", true)
@@ -1168,7 +1023,24 @@ public enum FrameIdentifier
 	TDTG("Tagging time", false), // not supported by NID3
 	TIPL("Involved people list", false), // not supported by NID3
 	TMCL("Musician credits list", false), // not supported by NID3
-	TMOO("Mood", false), // not supported by NID3
+	TMOO("Mood", true)
+	{
+		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyTMOO moodFB = (FrameBodyTMOO) body;
+			Model model = result.getModel();
+
+			// relate to master signal
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
+
+			ID3Util.addStringLiteral(model, resourceMap.get(ID3Util.SIGNAL),
+					AO.mood, moodFB.getFirstTextValue());
+		}
+	},
 	TPRO("Produced notice", false), // not supported by NID3
 	TSOA("Album sort order", false), // not supported by NID3
 	TSOP("Performer sort order", false), // not supported by NID3

@@ -13,7 +13,7 @@ import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.semanticdesktop.aperture.util.ResourceUtil;
 /**
- * Vocabulary File. Created by org.semanticdesktop.aperture.vocabulary.VocabularyWriter on Mon Nov 01 16:05:00 CET 2010
+ * Vocabulary File. Created by org.semanticdesktop.aperture.vocabulary.VocabularyWriter on Tue Nov 02 15:26:06 CET 2010
  * input file: /src/main/resources/smiy/pmkb/vocabulary/mo.owl
  * namespace: http://purl.org/ontology/mo/
  */
@@ -513,13 +513,17 @@ work #1 J. S. Bach's The art of the fugue  <br/>
     /**
      * Type: Instance of http://purl.org/ontology/mo/ReleaseType <br/>
      */
+    public static final URI single = new URIImpl("http://purl.org/ontology/mo/single");
+    /**
+     * Type: Instance of http://purl.org/ontology/mo/ReleaseType <br/>
+     */
     public static final URI soundtrack = new URIImpl("http://purl.org/ontology/mo/soundtrack");
     /**
      * Type: Instance of http://purl.org/ontology/mo/ReleaseType <br/>
      */
     public static final URI spokenword = new URIImpl("http://purl.org/ontology/mo/spokenword");
     /**
-     * Type: Instance of http://www.w3.org/2002/07/owl#FunctionalProperty <br/>
+     * Type: Instance of http://www.w3.org/2002/07/owl#DatatypeProperty <br/>
      * Comment: Associates a digital signal to the number a bits used to encode one sample. Range is xsd:int.  <br/>
      * Domain: http://purl.org/ontology/mo/DigitalSignal  <br/>
      * Range: http://www.w3.org/2001/XMLSchema#int  <br/>
@@ -530,7 +534,7 @@ work #1 J. S. Bach's The art of the fugue  <br/>
      * Label: bpm  <br/>
      * Comment: Indicates the BPM of a MusicalWork or a particular Performance 
 		Beats per minute: the pace of music measured by the number of beats occurring in 60 seconds.  <br/>
-     * Domain: _:node15g3vghdfx12  <br/>
+     * Domain: _:node15g6fm1iix12  <br/>
      * Range: http://www.w3.org/2001/XMLSchema#float  <br/>
      */
     public static final URI bpm = new URIImpl("http://purl.org/ontology/mo/bpm");
@@ -543,7 +547,7 @@ work #1 J. S. Bach's The art of the fugue  <br/>
      */
     public static final URI catalogue_number = new URIImpl("http://purl.org/ontology/mo/catalogue_number");
     /**
-     * Type: Instance of http://www.w3.org/2002/07/owl#FunctionalProperty <br/>
+     * Type: Instance of http://www.w3.org/2002/07/owl#DatatypeProperty <br/>
      * Comment: Associates a signal to the number of channels it holds (mono --> 1, stereo --> 2). Range is xsd:int.  <br/>
      * Domain: http://purl.org/ontology/mo/Signal  <br/>
      * Range: http://www.w3.org/2001/XMLSchema#int  <br/>
@@ -593,7 +597,7 @@ work #1 J. S. Bach's The art of the fugue  <br/>
      * Type: Instance of http://www.w3.org/2002/07/owl#DatatypeProperty <br/>
      * Label: ismn  <br/>
      * Comment: The International Standard Music Number (ISMN) is an ISO standard similar to ISBNs for identifying printed music publications  <br/>
-     * Domain: _:node15g3vghdfx70  <br/>
+     * Domain: _:node15g6fm1iix70  <br/>
      * Range: http://www.w3.org/2001/XMLSchema#string  <br/>
      */
     public static final URI ismn = new URIImpl("http://purl.org/ontology/mo/ismn");
@@ -627,7 +631,7 @@ work #1 J. S. Bach's The art of the fugue  <br/>
      * Type: Instance of http://www.w3.org/2002/07/owl#DatatypeProperty <br/>
      * Label: meter  <br/>
      * Comment: Associates a musical work or a score with its meter  <br/>
-     * Domain: _:node15g3vghdfx88  <br/>
+     * Domain: _:node15g6fm1iix88  <br/>
      */
     public static final URI meter = new URIImpl("http://purl.org/ontology/mo/meter");
     /**
@@ -646,7 +650,7 @@ work #1 J. S. Bach's The art of the fugue  <br/>
      * Type: Instance of http://www.w3.org/2002/07/owl#DatatypeProperty <br/>
      * Label: Musicbrainz GUID  <br/>
      * Comment: Links an object to the corresponding Musicbrainz identifier  <br/>
-     * Domain: _:node15g3vghdfx96  <br/>
+     * Domain: _:node15g6fm1iix96  <br/>
      */
     public static final URI musicbrainz_guid = new URIImpl("http://purl.org/ontology/mo/musicbrainz_guid");
     /**
@@ -703,7 +707,7 @@ in conjunction with mo:track_number, so that one can infer e.g. "A1", that means
      */
     public static final URI sampleRate = new URIImpl("http://purl.org/ontology/mo/sampleRate");
     /**
-     * Type: Instance of http://www.w3.org/2002/07/owl#FunctionalProperty <br/>
+     * Type: Instance of http://www.w3.org/2002/07/owl#DatatypeProperty <br/>
      * Comment: Associates a digital signal to its sample rate. It might be easier to express it this way instead of
 		defining a timeline map:-) Range is xsd:float.  <br/>
      * Domain: http://purl.org/ontology/mo/DigitalSignal  <br/>
@@ -718,7 +722,7 @@ in conjunction with mo:track_number, so that one can infer e.g. "A1", that means
 		adagio (quite slow); andante (a walking pace); moderato (moderate); allegro (fast; cheerful); 
 		vivace (lively); presto (very fast); accelerando (getting faster); ritardando (getting slower); 
 		and a tempo (in time; returning to the original pace).  <br/>
-     * Domain: _:node15g3vghdfx141  <br/>
+     * Domain: _:node15g6fm1iix141  <br/>
      * Range: http://www.w3.org/2001/XMLSchema#string  <br/>
      */
     public static final URI tempo = new URIImpl("http://purl.org/ontology/mo/tempo");
@@ -779,7 +783,7 @@ in conjunction with mo:track_number, so that one can infer e.g. "A1", that means
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: amazon_asin  <br/>
      * Comment: Used to link a work or the expression of a work to its corresponding Amazon ASINs page.  <br/>
-     * Domain: _:node15g3vghdfx7  <br/>
+     * Domain: _:node15g6fm1iix7  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI amazon_asin = new URIImpl("http://purl.org/ontology/mo/amazon_asin");
@@ -825,7 +829,7 @@ in conjunction with mo:track_number, so that one can infer e.g. "A1", that means
      */
     public static final URI biography = new URIImpl("http://purl.org/ontology/mo/biography");
     /**
-     * Type: Instance of http://www.w3.org/2002/07/owl#SymmetricProperty <br/>
+     * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: collaborated_with  <br/>
      * Comment: Used to relate two collaborating people on a work.  <br/>
      * Domain: http://xmlns.com/foaf/0.1/Agent  <br/>
@@ -918,7 +922,7 @@ in conjunction with mo:track_number, so that one can infer e.g. "A1", that means
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: discogs  <br/>
      * Comment: Used to link a musical work or the expression of a musical work, an artist or a corporate body to to its corresponding Discogs page.  <br/>
-     * Domain: _:node15g3vghdfx16  <br/>
+     * Domain: _:node15g6fm1iix16  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI discogs = new URIImpl("http://purl.org/ontology/mo/discogs");
@@ -965,7 +969,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
                 a Flash application) - it is better to link to actual content directly through the use of mo:available_as and
                 mo:Stream, mo:Torrent or mo:ED2K, etc. Therefore, Semantic Web user agents that don't know how to read HTML and even
                 less to rip streams from Flash applications can still access the audio content.  <br/>
-     * Domain: _:node15g3vghdfx22  <br/>
+     * Domain: _:node15g6fm1iix22  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI download = new URIImpl("http://purl.org/ontology/mo/download");
@@ -982,7 +986,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
     /**
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Comment: Relates a performance or a recording to the engineer involved  <br/>
-     * Domain: _:node15g3vghdfx26  <br/>
+     * Domain: _:node15g6fm1iix26  <br/>
      * Range: http://xmlns.com/foaf/0.1/Agent  <br/>
      */
     public static final URI engineer = new URIImpl("http://purl.org/ontology/mo/engineer");
@@ -991,7 +995,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Label: engineered  <br/>
      * Comment: Relates agents to the performances/recordings they were engineering in  <br/>
      * Domain: http://xmlns.com/foaf/0.1/Agent  <br/>
-     * Range: _:node15g3vghdfx30  <br/>
+     * Range: _:node15g6fm1iix30  <br/>
      */
     public static final URI engineered = new URIImpl("http://purl.org/ontology/mo/engineered");
     /**
@@ -1033,7 +1037,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
 		a Flash application) - it is better to link to actual content directly through the use of mo:available_as and 
 		mo:Stream, mo:Torrent or mo:ED2K, etc. Therefore, Semantic Web user agents that don't know how to read HTML and even
 		less to rip streams from Flash applications can still access the audio content.  <br/>
-     * Domain: _:node15g3vghdfx34  <br/>
+     * Domain: _:node15g6fm1iix34  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI free_download = new URIImpl("http://purl.org/ontology/mo/free_download");
@@ -1046,7 +1050,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Label: genre  <br/>
      * Comment: Associates an event (like a performance or a recording) to a particular musical genre.
 		Further version of this property may also include works and scores in the domain.  <br/>
-     * Domain: _:node15g3vghdfx38  <br/>
+     * Domain: _:node15g6fm1iix38  <br/>
      * Range: http://purl.org/ontology/mo/Genre  <br/>
      */
     public static final URI genre = new URIImpl("http://purl.org/ontology/mo/genre");
@@ -1072,7 +1076,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: homepage  <br/>
      * Comment: Links an artist, a record, etc. to a corresponding web page  <br/>
-     * Domain: _:node15g3vghdfx49  <br/>
+     * Domain: _:node15g6fm1iix49  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI homepage = new URIImpl("http://purl.org/ontology/mo/homepage");
@@ -1080,7 +1084,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: image  <br/>
      * Comment: Indicates a pictorial image (JPEG, GIF, PNG, Etc.) of a musical work, the expression of a musical work, the manifestation of a work or the examplar of a manifestation.  <br/>
-     * Domain: _:node15g3vghdfx55  <br/>
+     * Domain: _:node15g6fm1iix55  <br/>
      * Range: http://xmlns.com/foaf/0.1/Image  <br/>
      */
     public static final URI image = new URIImpl("http://purl.org/ontology/mo/image");
@@ -1088,14 +1092,14 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: imdb  <br/>
      * Comment: Used to link an artist, a musical work or the expression of a musical work to their equivalent page on IMDb, the InternetMovieDatabase.  <br/>
-     * Domain: _:node15g3vghdfx61  <br/>
+     * Domain: _:node15g6fm1iix61  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI imdb = new URIImpl("http://purl.org/ontology/mo/imdb");
     /**
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Comment: Relates a performance to a musical instrument involved  <br/>
-     * Domain: _:node15g3vghdfx67  <br/>
+     * Domain: _:node15g6fm1iix67  <br/>
      * Range: http://purl.org/ontology/mo/Instrument  <br/>
      */
     public static final URI instrument = new URIImpl("http://purl.org/ontology/mo/instrument");
@@ -1120,7 +1124,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Label: key  <br/>
      * Comment: Indicated the key used by the musicians during a performance, or the key of a MusicalWork.
 		Any of 24 major or minor diatonic scales that provide the tonal framework for a piece of music.  <br/>
-     * Domain: _:node15g3vghdfx74  <br/>
+     * Domain: _:node15g6fm1iix74  <br/>
      * Range: http://purl.org/NET/c4dm/keys.owl#Key  <br/>
      */
     public static final URI key = new URIImpl("http://purl.org/ontology/mo/key");
@@ -1128,7 +1132,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: label  <br/>
      * Comment: Associates a release event with the label releasing the record  <br/>
-     * Domain: _:node15g3vghdfx77  <br/>
+     * Domain: _:node15g6fm1iix77  <br/>
      * Range: http://purl.org/ontology/mo/Label  <br/>
      */
     public static final URI label = new URIImpl("http://purl.org/ontology/mo/label");
@@ -1138,7 +1142,7 @@ The artist usually selected the tracks, chose their sequence, and slightly chang
      * Comment: Used to link a work or the expression of a work to the license under which they can be manipulated (downloaded, modified, etc). 
     
 This is usually used to link to a Creative Commons licence.  <br/>
-     * Domain: _:node15g3vghdfx80  <br/>
+     * Domain: _:node15g6fm1iix80  <br/>
      * Range: http://web.resource.org/cc/License  <br/>
      */
     public static final URI licence = new URIImpl("http://purl.org/ontology/mo/licence");
@@ -1161,7 +1165,7 @@ This is usually used to link to a Creative Commons licence.  <br/>
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: mailorder  <br/>
      * Comment: Used to link a musical work or the expression of a musical work to a website where people can buy a copy of the musical manifestation.  <br/>
-     * Domain: _:node15g3vghdfx84  <br/>
+     * Domain: _:node15g6fm1iix84  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI mailorder = new URIImpl("http://purl.org/ontology/mo/mailorder");
@@ -1225,7 +1229,7 @@ This means that the orignial musical expression were rearranged to create a new 
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: musicbrainz  <br/>
      * Comment: Linking an agent, a track or a record to its corresponding Musicbrainz page.  <br/>
-     * Domain: _:node15g3vghdfx91  <br/>
+     * Domain: _:node15g6fm1iix91  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI musicbrainz = new URIImpl("http://purl.org/ontology/mo/musicbrainz");
@@ -1233,7 +1237,7 @@ This means that the orignial musical expression were rearranged to create a new 
      * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: musicmoz  <br/>
      * Comment: Used to link an artist, a musical work or the expression of a musical work to its corresponding MusicMoz page.  <br/>
-     * Domain: _:node15g3vghdfx104  <br/>
+     * Domain: _:node15g6fm1iix104  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI musicmoz = new URIImpl("http://purl.org/ontology/mo/musicmoz");
@@ -1262,7 +1266,7 @@ This means that the orignial musical expression were rearranged to create a new 
      */
     public static final URI onlinecommunity = new URIImpl("http://purl.org/ontology/mo/onlinecommunity");
     /**
-     * Type: Instance of http://www.w3.org/2002/07/owl#SymmetricProperty <br/>
+     * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: other_release_of  <br/>
      * Comment: Indicates that two musical manifestations are essentially the same.  <br/>
      * Domain: http://purl.org/ontology/mo/MusicalManifestation  <br/>
@@ -1274,7 +1278,7 @@ This means that the orignial musical expression were rearranged to create a new 
      * Label: paid download  <br/>
      * Comment: Provide a link from an artist to a web page where all of that artist's musical work is available for some money,
                 or a link from a manifestation (record/track, for example) to a web page providing a paid access to this manifestation.  <br/>
-     * Domain: _:node15g3vghdfx109  <br/>
+     * Domain: _:node15g6fm1iix109  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI paid_download = new URIImpl("http://purl.org/ontology/mo/paid_download");
@@ -1289,7 +1293,7 @@ This means that the orignial musical expression were rearranged to create a new 
 		For example, I might use this property to attach the Magic Flute musical work to 
 		a particular Performance.  <br/>
      * Domain: http://purl.org/ontology/mo/Performance  <br/>
-     * Range: _:node15g3vghdfx113  <br/>
+     * Range: _:node15g6fm1iix113  <br/>
      */
     public static final URI performance_of = new URIImpl("http://purl.org/ontology/mo/performance_of");
     /**
@@ -1307,7 +1311,7 @@ This means that the orignial musical expression were rearranged to create a new 
 		a factor. For example, I might use this property in order to 
 		associate the Magic Flute to a particular performance at the Opera
 		Bastille last year.  <br/>
-     * Domain: _:node15g3vghdfx116  <br/>
+     * Domain: _:node15g6fm1iix116  <br/>
      * Range: http://purl.org/ontology/mo/Performance  <br/>
      */
     public static final URI performed_in = new URIImpl("http://purl.org/ontology/mo/performed_in");
@@ -1344,7 +1348,7 @@ This means that the orignial musical expression were rearranged to create a new 
                 a Flash application) - it is better to link to actual content directly through the use of mo:available_as and
                 mo:Stream, mo:Torrent or mo:ED2K, etc. Therefore, Semantic Web user agents that don't know how to read HTML and even
                 less to rip streams from Flash applications can still access the audio content.  <br/>
-     * Domain: _:node15g3vghdfx119  <br/>
+     * Domain: _:node15g6fm1iix119  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI preview_download = new URIImpl("http://purl.org/ontology/mo/preview_download");
@@ -1607,7 +1611,7 @@ This involves taking just one other musical work and using audio editing to make
      * Comment: Used to link a work or the expression of a work to a review. 
     
 The review does not have to be open content, as long as it is accessible to the general internet population.  <br/>
-     * Domain: _:node15g3vghdfx123  <br/>
+     * Domain: _:node15g6fm1iix123  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI review = new URIImpl("http://purl.org/ontology/mo/review");
@@ -1676,8 +1680,8 @@ The review does not have to be open content, as long as it is accessible to the 
 		artists, or coming from some automatic content analysis).
 		However, the origin of such statements should be kept using a named graph approach - and ultimately, the 
 		documents providing such statements should attach some metadata to themselves (confidence of the claim, etc.).  <br/>
-     * Domain: _:node15g3vghdfx127  <br/>
-     * Range: _:node15g3vghdfx134  <br/>
+     * Domain: _:node15g6fm1iix127  <br/>
+     * Range: _:node15g6fm1iix134  <br/>
      */
     public static final URI similar_to = new URIImpl("http://purl.org/ontology/mo/similar_to");
     /**
@@ -1696,7 +1700,7 @@ The review does not have to be open content, as long as it is accessible to the 
      */
     public static final URI supporting_musician = new URIImpl("http://purl.org/ontology/mo/supporting_musician");
     /**
-     * Type: Instance of http://www.w3.org/2002/07/owl#FunctionalProperty <br/>
+     * Type: Instance of http://www.w3.org/2002/07/owl#ObjectProperty <br/>
      * Label: time  <br/>
      * Comment: Associates a Signal to a time object - its actual domain  <br/>
      * Domain: http://purl.org/ontology/mo/Signal  <br/>
@@ -1757,7 +1761,7 @@ The review does not have to be open content, as long as it is accessible to the 
      * Comment: Used to link an work, an expression of a work, a manifestation of a work, 
 		a person, an instrument or a musical genre to its corresponding WikiPedia page. 
 		The full URL should be used, not just the WikiName.  <br/>
-     * Domain: _:node15g3vghdfx144  <br/>
+     * Domain: _:node15g6fm1iix144  <br/>
      * Range: http://xmlns.com/foaf/0.1/Document  <br/>
      */
     public static final URI wikipedia = new URIImpl("http://purl.org/ontology/mo/wikipedia");

@@ -230,6 +230,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource outlet = ModelUtil.generateRandomResource(model);
 		Resource service = ModelUtil.generateRandomResource(model);
 		Resource albumArtist = ModelUtil.generateRandomResource(model);
+		Resource signalGroup = ModelUtil.generateRandomResource(model);
 
 		resourceMap.put(ID3Util.SIGNAL, signal);
 		resourceMap.put(ID3Util.MUSICALWORK, musicalWork);
@@ -248,6 +249,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		resourceMap.put(ID3Util.OUTLET, outlet);
 		resourceMap.put(ID3Util.SERVICE, service);
 		resourceMap.put(ID3Util.ALBUMARTIST, albumArtist);
+		resourceMap.put(ID3Util.SIGNALGROUP, signalGroup);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
@@ -309,9 +311,11 @@ public class MP3FileExtractor extends AbstractFileExtractor
 			}
 			else if (uri.equals(NID3.albumTitle))
 			{
-				ID3Util.addRecordTitle(model, value, resourceMap
-						.get(ID3Util.MUSICALBUM), resourceMap
-						.get(ID3Util.TRACK));
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+						.get(ID3Util.TRACK), MO.Record);
+				ID3Util.addStringLiteral(model, resourceMap
+						.get(ID3Util.MUSICALBUM), DC.title, value);
 				continue;
 			}
 			else if (uri.equals(NID3.recordingYear))
@@ -369,7 +373,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 					// FIXME: a music genre can also be item specific
 					// (subjective, personal)
 					model.addStatement(resourceMap.get(ID3Util.TRACK),
-							MO.genre, GenreUri.getGenreByIntId(
+							MO.genre, GenreUri.getGenreUriByIntId(
 									Genre.getGenreByName(value).getId())
 									.getUri());
 				}
@@ -416,21 +420,9 @@ public class MP3FileExtractor extends AbstractFileExtractor
 			else
 			{
 				// result.add(uri, value);
-				try
-				{
-					model.addStatement(resourceMap.get(ID3Util.TRACK), uri,
-							ModelUtil.createLiteral(model, value));
-				}
-				catch (ModelRuntimeException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				catch (ModelException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				// FIXME: add the property now to the mo:Track instance
+				ID3Util.addStringLiteral(model, resourceMap.get(ID3Util.TRACK),
+						uri, value);
 			}
 		}
 	}

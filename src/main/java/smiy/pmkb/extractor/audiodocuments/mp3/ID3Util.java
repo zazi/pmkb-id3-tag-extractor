@@ -24,7 +24,6 @@ import org.ontoware.rdf2go.vocabulary.RDF;
 import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
-import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.MO;
@@ -58,6 +57,7 @@ public class ID3Util
 	public static final String OUTLET = "outlet";
 	public static final String SERVICE = "service";
 	public static final String ALBUMARTIST = "albumArtist";
+	public static final String SIGNALGROUP = "signalGroup";
 
 	/**
 	 * As taken from the timestamp definition published at <br/>
@@ -124,15 +124,13 @@ public class ID3Util
 		return result.getTime();
 	}
 
-	public static void addRecordTitle(Model model, String value,
-			Resource musicAlbum, Resource track)
+	public static void addStringLiteral(Model model, Resource subject,
+			URI predicate, String stringLiteral)
 	{
-		checkStatementSubject(model, musicAlbum, MO.track, track, MO.Record);
-
 		try
 		{
-			model.addStatement(musicAlbum, DC.title, ModelUtil.createLiteral(
-					model, value));
+			model.addStatement(subject, predicate, ModelUtil.createLiteral(
+					model, stringLiteral));
 		}
 		catch (ModelRuntimeException e)
 		{
@@ -151,7 +149,6 @@ public class ID3Util
 		ID3Util
 				.addAgent(model, subject, DCTERMS.creator, MO.MusicArtist,
 						value);
-
 	}
 
 	/**
@@ -178,10 +175,10 @@ public class ID3Util
 			mediaTypeShortened = mediaType;
 		}
 
-		if (MediaTypeUri.getKeyByStringId(mediaTypeShortened) != null)
+		if (MediaTypeUri.getMediaTypeUriByStringId(mediaTypeShortened) != null)
 		{
 			MediaTypeUri mediaTypeUriKey = MediaTypeUri
-					.getKeyByStringId(mediaTypeShortened);
+					.getMediaTypeUriByStringId(mediaTypeShortened);
 
 			// handle specific video media types (VHS, S-VHS, Betamax)
 			if (mediaTypeUriKey == MediaTypeUri.VID)
@@ -190,9 +187,10 @@ public class ID3Util
 				String mediaTypeShortenedEnd = mediaType.substring(mediaType
 						.length() - 4, mediaType.length() - 1);
 
-				if (MediaTypeUri.getKeyByStringId(mediaTypeShortenedEnd) != null)
+				if (MediaTypeUri
+						.getMediaTypeUriByStringId(mediaTypeShortenedEnd) != null)
 				{
-					mediaTypeUri = MediaTypeUri.getKeyByStringId(
+					mediaTypeUri = MediaTypeUri.getMediaTypeUriByStringId(
 							mediaTypeShortenedEnd).getUri();
 				}
 				else
@@ -201,9 +199,10 @@ public class ID3Util
 					mediaTypeShortenedEnd = mediaType.substring(mediaType
 							.length() - 3, mediaType.length() - 1);
 
-					if (MediaTypeUri.getKeyByStringId(mediaTypeShortenedEnd) != null)
+					if (MediaTypeUri
+							.getMediaTypeUriByStringId(mediaTypeShortenedEnd) != null)
 					{
-						mediaTypeUri = MediaTypeUri.getKeyByStringId(
+						mediaTypeUri = MediaTypeUri.getMediaTypeUriByStringId(
 								mediaTypeShortenedEnd).getUri();
 					}
 				}
@@ -220,9 +219,9 @@ public class ID3Util
 			{
 				mediaTypeShortened = mediaType.substring(0, 6);
 
-				if (MediaTypeUri.getKeyByStringId(mediaTypeShortened) != null)
+				if (MediaTypeUri.getMediaTypeUriByStringId(mediaTypeShortened) != null)
 				{
-					mediaTypeUri = MediaTypeUri.getKeyByStringId(
+					mediaTypeUri = MediaTypeUri.getMediaTypeUriByStringId(
 							mediaTypeShortened).getUri();
 				}
 			}
@@ -241,21 +240,7 @@ public class ID3Util
 		Resource agent = ModelUtil.generateRandomResource(model);
 		model.addStatement(subject, predicate, agent);
 		model.addStatement(agent, RDF.type, type);
-		try
-		{
-			model.addStatement(agent, FOAF.name, ModelUtil.createLiteral(model,
-					name));
-		}
-		catch (ModelRuntimeException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (ModelException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		addStringLiteral(model, agent, FOAF.name, name);
 	}
 
 	public static void checkCount(Model model, Resource subject, URI predicate,
@@ -347,5 +332,38 @@ public class ID3Util
 				resourceMap.get(ID3Util.EPISODEVERSION), PO.Broadcast);
 		ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.BROADCAST),
 				PO.broadcast_on, resourceMap.get(ID3Util.OUTLET), PO.Outlet);
+	}
+
+	public static void checkBPM(Model model,
+			HashMap<String, Resource> resourceMap, float bpm)
+	{
+		try
+		{
+			if (model.contains(ModelUtil.createStatement(model, resourceMap
+					.get(ID3Util.SIGNAL), MO.bpm, ModelUtil.createLiteral(
+					model, bpm))))
+			{
+				// relate to master signal
+				ID3Util.checkStatementSubject(model, resourceMap
+						.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+						.get(ID3Util.TRACK), MO.Signal);
+
+				// should be an integer stored as string and now transformed to
+				// a
+				// float value
+				model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.bpm,
+						ModelUtil.createLiteral(model, bpm));
+			}
+		}
+		catch (ModelRuntimeException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ModelException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

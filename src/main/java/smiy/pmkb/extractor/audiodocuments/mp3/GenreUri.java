@@ -369,9 +369,9 @@ public enum GenreUri
 	static
 	{
 		urisToNumbersMap = new HashMap<URI, GenreUri>(2 * values().length);
-		for (GenreUri genre : values())
+		for (GenreUri genreUri : values())
 		{
-			urisToNumbersMap.put(genre.getUri(), genre);
+			urisToNumbersMap.put(genreUri.getUri(), genreUri);
 		}
 	}
 
@@ -380,7 +380,7 @@ public enum GenreUri
 		return urisToNumbersMap.get(uri);
 	}
 
-	public static GenreUri getGenreByByteId(byte id)
+	public static GenreUri getGenreUriByByteId(byte id)
 	{
 		int convertedByte = (id >= 0 ? id : (int) id + 256);
 		if (convertedByte < 0 || convertedByte >= values().length)
@@ -393,7 +393,7 @@ public enum GenreUri
 		}
 	}
 
-	public static GenreUri getGenreByIntId(int id)
+	public static GenreUri getGenreUriByIntId(int id)
 	{
 		if (id < 0 || id >= values().length)
 		{

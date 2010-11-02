@@ -53,9 +53,9 @@ public enum MediaTypeUri
 	static
 	{
 		urisToNumbersMap = new HashMap<URI, MediaTypeUri>(2 * values().length);
-		for (MediaTypeUri key : values())
+		for (MediaTypeUri mediaTypeUri : values())
 		{
-			urisToNumbersMap.put(key.getUri(), key);
+			urisToNumbersMap.put(mediaTypeUri.getUri(), mediaTypeUri);
 		}
 	}
 
@@ -65,18 +65,18 @@ public enum MediaTypeUri
 	{
 		urisToStringsMap = new HashMap<String, MediaTypeUri>(
 				2 * values().length);
-		for (MediaTypeUri key : values())
+		for (MediaTypeUri mediaTypeUri : values())
 		{
-			urisToStringsMap.put(key.getId(), key);
+			urisToStringsMap.put(mediaTypeUri.getId(), mediaTypeUri);
 		}
 	}
 
-	public static MediaTypeUri getKeyByUri(URI uri)
+	public static MediaTypeUri getMediaTypeUriByUri(URI uri)
 	{
 		return urisToNumbersMap.get(uri);
 	}
 
-	public static MediaTypeUri getKeyByStringId(String id)
+	public static MediaTypeUri getMediaTypeUriByStringId(String id)
 	{
 		if (id == null)
 		{

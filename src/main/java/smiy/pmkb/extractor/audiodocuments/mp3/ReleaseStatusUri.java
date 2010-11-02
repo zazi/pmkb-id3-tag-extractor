@@ -15,7 +15,7 @@ import org.ontoware.rdf2go.model.node.URI;
 import smiy.pmkb.vocabulary.MO;
 
 /**
- * The media types of the TMED frame.
+ * The MusicBrainz release states.
  */
 public enum ReleaseStatusUri
 {
@@ -48,9 +48,9 @@ public enum ReleaseStatusUri
 	{
 		urisToNumbersMap = new HashMap<URI, ReleaseStatusUri>(
 				2 * values().length);
-		for (ReleaseStatusUri key : values())
+		for (ReleaseStatusUri releaseStatusUri : values())
 		{
-			urisToNumbersMap.put(key.getUri(), key);
+			urisToNumbersMap.put(releaseStatusUri.getUri(), releaseStatusUri);
 		}
 	}
 
@@ -60,18 +60,18 @@ public enum ReleaseStatusUri
 	{
 		urisToStringsMap = new HashMap<String, ReleaseStatusUri>(
 				2 * values().length);
-		for (ReleaseStatusUri key : values())
+		for (ReleaseStatusUri releaseStatusUri : values())
 		{
-			urisToStringsMap.put(key.getId(), key);
+			urisToStringsMap.put(releaseStatusUri.getId(), releaseStatusUri);
 		}
 	}
 
-	public static ReleaseStatusUri getKeyByUri(URI uri)
+	public static ReleaseStatusUri getReleaseStatusUriByUri(URI uri)
 	{
 		return urisToNumbersMap.get(uri);
 	}
 
-	public static ReleaseStatusUri getKeyByStringId(String id)
+	public static ReleaseStatusUri getReleaseStatusUriByStringId(String id)
 	{
 		if (id == null)
 		{
