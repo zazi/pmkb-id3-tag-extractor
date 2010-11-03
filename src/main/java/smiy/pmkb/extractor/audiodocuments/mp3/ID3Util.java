@@ -21,10 +21,12 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.vocabulary.RDF;
+import org.ontoware.rdf2go.vocabulary.XSD;
 import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
 import smiy.pmkb.vocabulary.DCTERMS;
+import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.MT;
@@ -43,6 +45,12 @@ public class ID3Util
 	public static final String RELEASE = "release";
 	public static final String RELEASEEVENT = "releaseEvent";
 	public static final String SIGNAL = "SIGNAL";
+	/**
+	 * "master signal" - this must be not really the master signal of a
+	 * recording, however, the signal that is related to some (published)
+	 * mo:Track instances
+	 */
+	public static final String MASTERSIGNAL = "masterSignal";
 	public static final String MUSICALWORK = "musicalWork";
 	public static final String LYRICS = "lyrics";
 	public static final String ORIGINALSIGNAL = "originalSignal";
@@ -60,6 +68,8 @@ public class ID3Util
 	public static final String ALBUMARTIST = "albumArtist";
 	public static final String SIGNALGROUP = "signalGroup";
 	public static final String LABEL = "label";
+	public static final String ORIGINALRELEASEEVENT = "originalReleaseEvent";
+	public static final String RECORDING = "recording";
 
 	/**
 	 * As taken from the timestamp definition published at <br/>
@@ -368,8 +378,21 @@ public class ID3Util
 			e.printStackTrace();
 		}
 	}
+
+	public static void preparePublisherConnection(Model model,
+			HashMap<String, Resource> resourceMap)
+	{
+		prepareReleaseEventConnection(model, resourceMap);
+
+		// FIXME: associates publisher explicitly as label, however it can
+		// also be a person
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.RELEASEEVENT), MO.label, resourceMap
+				.get(ID3Util.LABEL), MO.Label);
+	}
 	
-	public static void preparePublisherConnection(Model model, HashMap<String, Resource> resourceMap)
+	public static void prepareReleaseEventConnection(Model model,
+			HashMap<String, Resource> resourceMap)
 	{
 		ID3Util.checkStatementSubject(model, resourceMap
 				.get(ID3Util.MUSICALBUM), MO.track, resourceMap
@@ -380,11 +403,30 @@ public class ID3Util
 		ID3Util.checkStatementSubject(model, resourceMap
 				.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
 				.get(ID3Util.RELEASE), MO.ReleaseEvent);
-
-		// FIXME: associates publisher explicitly as label, however it can
-		// also be a person
-		ID3Util.checkStatementObject(model, resourceMap
-				.get(ID3Util.RELEASEEVENT), MO.label, resourceMap
-				.get(ID3Util.LABEL), MO.Label);
+	}
+	
+	public static void createTimeInstant(Model model, Resource subject, Date time)
+	{
+		// create time instant
+		Resource timeInstant = ModelUtil
+				.generateRandomResource(model);
+		model.addStatement(subject, EVENT.time, timeInstant);
+		model.addStatement(timeInstant, RDF.type,
+				smiy.pmkb.vocabulary.TIME.Instant);
+		// FIXME: is Data date format == xsd data format?
+		try
+		{
+			model.addStatement(timeInstant, TL.atDate, ModelUtil.createLiteral(model, time.toString(), XSD._date));
+		}
+		catch (ModelRuntimeException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ModelException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -11,6 +11,7 @@ package smiy.pmkb.extractor.audiodocuments.mp3;
 import java.util.HashMap;
 
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTIPL;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyWXXX;
 import org.ontoware.rdf2go.model.Model;
@@ -138,15 +139,7 @@ public enum UserDefinedDescription
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-					.get(ID3Util.TRACK), MO.Record);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.RELEASE), MO.record, resourceMap
-					.get(ID3Util.MUSICALBUM), MO.Release);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
-					.get(ID3Util.RELEASE), MO.ReleaseEvent);
+			ID3Util.prepareReleaseEventConnection(model, resourceMap);
 
 			// Release Country
 			// add country name
@@ -236,16 +229,8 @@ public enum UserDefinedDescription
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-					.get(ID3Util.TRACK), MO.Record);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.RELEASE), MO.record, resourceMap
-					.get(ID3Util.MUSICALBUM), MO.Release);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
-					.get(ID3Util.RELEASE), MO.ReleaseEvent);
-			ID3Util.checkStatementSubject(model, resourceMap
+			ID3Util.prepareReleaseEventConnection(model, resourceMap);
+			ID3Util.checkStatementObject(model, resourceMap
 					.get(ID3Util.RELEASEEVENT), EVENT.factor, resourceMap
 					.get(ID3Util.SIGNALGROUP), MO.SignalGroup);
 
@@ -304,13 +289,13 @@ public enum UserDefinedDescription
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
 			ID3Util.checkStatementSubject(model, resourceMap
 					.get(ID3Util.PERFORMANCE), MO.recorded_as, resourceMap
-					.get(ID3Util.SIGNAL), MO.Performance);
+					.get(ID3Util.MASTERSIGNAL), MO.Performance);
 
 			ID3Util.addAgent(model, resourceMap.get(ID3Util.PERFORMANCE),
 					MO.performer, MO.MusicArtist, txxx.getFirstTextValue());
@@ -395,6 +380,9 @@ public enum UserDefinedDescription
 					resourceMap.get(ID3Util.TRACKARTIST));
 			model.addStatement(discogsArtistSite, RDF.type, BIBO.Document);
 			model.addStatement(discogsArtistSite, IS.info_service, ISI.discogs);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.TRACKARTIST), FOAF.page,
+					discogsArtistSite);
 		}
 	},
 	URL_DISCOGS_RELEASE_SITE(FrameBodyWXXX.URL_DISCOGS_RELEASE_SITE, true)
@@ -419,6 +407,9 @@ public enum UserDefinedDescription
 			model
 					.addStatement(discogsReleaseSite, IS.info_service,
 							ISI.discogs);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.RELEASE), FOAF.page,
+					discogsReleaseSite);
 		}
 	},
 	URL_LYRICS_SITE(FrameBodyWXXX.URL_LYRICS_SITE, true)
@@ -436,6 +427,9 @@ public enum UserDefinedDescription
 			model.addStatement(lyricsSite, FOAF.primaryTopic, resourceMap
 					.get(ID3Util.LYRICS));
 			model.addStatement(lyricsSite, RDF.type, BIBO.Document);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.LYRICS), FOAF.page,
+					lyricsSite);
 		}
 	},
 	URL_OFFICIAL_RELEASE_SITE(FrameBodyWXXX.URL_OFFICIAL_RELEASE_SITE, true)
@@ -479,6 +473,9 @@ public enum UserDefinedDescription
 			model.addStatement(wikipediaArtistSite, RDF.type, BIBO.Document);
 			model.addStatement(wikipediaArtistSite, IS.info_service,
 					ISI.wikipedia);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.TRACKARTIST), FOAF.page,
+					wikipediaArtistSite);
 		}
 	},
 	URL_WIKIPEDIA_RELEASE_SITE(FrameBodyWXXX.URL_WIKIPEDIA_RELEASE_SITE, true)
@@ -502,6 +499,83 @@ public enum UserDefinedDescription
 			model.addStatement(wikipediaReleaseSite, RDF.type, BIBO.Document);
 			model.addStatement(wikipediaReleaseSite, IS.info_service,
 					ISI.wikipedia);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.RELEASE), FOAF.page,
+					wikipediaReleaseSite);
+		}
+	},
+	ARRANGER(FrameBodyTIPL.ARRANGER, true)
+	{
+		public void process(RDFContainer result,
+				HashMap<String, Resource> resourceMap, String name)
+		{
+			Model model = result.getModel();
+
+			// relate to "master signal"
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RECORDING), MO.produced_signal, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.Recording);
+
+			// MO.Arranger -> on recording
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.RECORDING),
+					EVENT.agent, MO.Arranger, name);
+
+		}
+	},
+	DJMIXER(FrameBodyTIPL.DJMIXER, true)
+	{
+		public void process(RDFContainer result,
+				HashMap<String, Resource> resourceMap, String name)
+		{
+			Model model = result.getModel();
+
+			// relate to "master signal"
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
+
+			// MO.djmixed_by -> on signal
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.SIGNAL),
+					MO.djmixed_by, MO.MusicArtist, name);
+		}
+	},
+	ENGINEER(FrameBodyTIPL.ENGINEER, true)
+	{
+		public void process(RDFContainer result,
+				HashMap<String, Resource> resourceMap, String name)
+		{
+			Model model = result.getModel();
+
+			// relate to "master signal"
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RECORDING), MO.produced_signal, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.Recording);
+
+			// MO.engineer -> on recording
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.RECORDING),
+					MO.engineer, FOAF.Person, name);
+
+		}
+	},
+	MIXER(FrameBodyTIPL.MIXER, true), // what is a "mixer"?; FIXME: currently
+	// not supported by PMKB
+	PRODUCER(FrameBodyTIPL.PRODUCER, true)
+	{
+		public void process(RDFContainer result,
+				HashMap<String, Resource> resourceMap, String name)
+		{
+			Model model = result.getModel();
+
+			// MO.producer -> on manifestation (should probably be on the
+			// expression level)
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.TRACK),
+					MO.producer, FOAF.Person, name);
 		}
 	};
 
@@ -549,6 +623,12 @@ public enum UserDefinedDescription
 
 	public void process(AbstractTagFrameBody body, RDFContainer result,
 			HashMap<String, Resource> resourceMap)
+	{
+		// the default behavior for unsupported frames is to do nothing
+	}
+
+	public void process(RDFContainer result,
+			HashMap<String, Resource> resourceMap, String name)
 	{
 		// the default behavior for unsupported frames is to do nothing
 	}

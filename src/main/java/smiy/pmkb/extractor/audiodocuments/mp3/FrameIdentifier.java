@@ -13,15 +13,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.jaudiotagger.tag.datatype.Pair;
+import org.jaudiotagger.tag.datatype.PairedTextEncodedStringNullTerminated.ValuePairs;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
 import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyAPIC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyCOMM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyGEOB;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyIPLS;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyPCNT;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyPOPM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTALB;
@@ -30,10 +34,14 @@ import org.jaudiotagger.tag.id3.framebody.FrameBodyTCOM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTCON;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTCOP;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDAT;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTDEN;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTDOR;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDRC;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTDRL;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTENC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTEXT;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTFLT;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyTIPL;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTIT1;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTIT2;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTIT3;
@@ -87,6 +95,8 @@ import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 import org.semanticdesktop.aperture.vocabulary.NIE;
 
+import com.sun.org.apache.bcel.internal.generic.MONITORENTER;
+
 import smiy.pmkb.util.Namespaces;
 import smiy.pmkb.vocabulary.AO;
 import smiy.pmkb.vocabulary.BIBO;
@@ -100,6 +110,7 @@ import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.MT;
 import smiy.pmkb.vocabulary.PBO;
 import smiy.pmkb.vocabulary.PO;
+import smiy.pmkb.vocabulary.TIME;
 import smiy.pmkb.vocabulary.TL;
 import smiy.pmkb.vocabulary.WGS84;
 
@@ -445,14 +456,14 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				// relate to master signal
+				// relate to "master signal"
 				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.SIGNAL), MO.published_as, resourceMap
-						.get(ID3Util.TRACK), MO.Signal);
+						.get(ID3Util.MASTERSIGNAL), MO.published_as,
+						resourceMap.get(ID3Util.TRACK), MO.Signal);
 
-				model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.key,
-						KeyUri.getKeyByStringId(keyFB.getFirstTextValue())
-								.getUri());
+				model.addStatement(resourceMap.get(ID3Util.MASTERSIGNAL),
+						MO.key, KeyUri.getKeyByStringId(
+								keyFB.getFirstTextValue()).getUri());
 			}
 		}
 	},
@@ -513,13 +524,13 @@ public enum FrameIdentifier
 			{
 				Model model = result.getModel();
 
-				// relate to master signal
+				// relate to "master signal"
 				ID3Util.checkStatementSubject(model, resourceMap
-						.get(ID3Util.SIGNAL), MO.published_as, resourceMap
-						.get(ID3Util.TRACK), MO.Signal);
+						.get(ID3Util.MASTERSIGNAL), MO.published_as,
+						resourceMap.get(ID3Util.TRACK), MO.Signal);
 				ID3Util.checkStatementObject(model, resourceMap
-						.get(ID3Util.SIGNAL), MO.derived_from, resourceMap
-						.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+						.get(ID3Util.MASTERSIGNAL), MO.derived_from,
+						resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
 				ID3Util.checkStatementObject(model, resourceMap
 						.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment,
 						resourceMap.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
@@ -544,13 +555,13 @@ public enum FrameIdentifier
 			Model model = result.getModel();
 			FrameBodyTOAL originalTitleFB = (FrameBodyTOAL) body;
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
-			ID3Util.checkStatementObject(model,
-					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
-					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
+					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
 			ID3Util.checkStatementObject(model, resourceMap
 					.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
 					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
@@ -583,13 +594,13 @@ public enum FrameIdentifier
 			FrameBodyTOLY originalLyricistFB = (FrameBodyTOLY) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
-			ID3Util.checkStatementObject(model,
-					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
-					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
+					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
 			ID3Util.checkStatementObject(model, resourceMap
 					.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
 					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
@@ -613,13 +624,13 @@ public enum FrameIdentifier
 			FrameBodyTOPE originalArtistFB = (FrameBodyTOPE) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
-			ID3Util.checkStatementObject(model,
-					resourceMap.get(ID3Util.SIGNAL), MO.derived_from,
-					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
+					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
 
 			// FIXME: handle multiple artists/performers ("/" separated)
 			ID3Util.addAgent(model, resourceMap.get(ID3Util.ORIGINALSIGNAL),
@@ -686,13 +697,13 @@ public enum FrameIdentifier
 			FrameBodyTPE3 conductorFB = (FrameBodyTPE3) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
 			ID3Util.checkStatementSubject(model, resourceMap
 					.get(ID3Util.PERFORMANCE), MO.recorded_as, resourceMap
-					.get(ID3Util.SIGNAL), MO.Performance);
+					.get(ID3Util.MASTERSIGNAL), MO.Performance);
 
 			ID3Util.addAgent(model, resourceMap.get(ID3Util.PERFORMANCE),
 					MO.conductor, FOAF.Person, conductorFB.getFirstTextValue());
@@ -707,12 +718,12 @@ public enum FrameIdentifier
 			FrameBodyTPE4 interpreterFB = (FrameBodyTPE4) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
 
-			ID3Util.addAgent(model, resourceMap.get(ID3Util.SIGNAL),
+			ID3Util.addAgent(model, resourceMap.get(ID3Util.MASTERSIGNAL),
 					MO.interpreter, MO.MusicArtist, interpreterFB
 							.getFirstTextValue());
 		}
@@ -828,12 +839,12 @@ public enum FrameIdentifier
 			FrameBodyTSRC isrcFB = (FrameBodyTSRC) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
 
-			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.isrc,
+			model.addStatement(resourceMap.get(ID3Util.MASTERSIGNAL), MO.isrc,
 					ModelUtil.createLiteral(model, isrcFB.getFirstTextValue()));
 		}
 	},
@@ -893,11 +904,15 @@ public enum FrameIdentifier
 
 			// a URL pointing at a webpage with information such as where the
 			// album can be bought
+			// FIXME: I used mo:paid_download for WPAY :\
 			Resource commercialInformation = model
 					.createURI(commercialInformationFB.getUrlLink());
 			model.addStatement(commercialInformation, FOAF.primaryTopic,
 					resourceMap.get(ID3Util.TRACK));
 			model.addStatement(commercialInformation, RDF.type, BIBO.Document);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.TRACK), FOAF.page,
+					commercialInformation);
 		}
 	},
 	WCOP("Copyright/Legal information", true)
@@ -930,6 +945,8 @@ public enum FrameIdentifier
 			Resource fileSite = model.createURI(fileSiteFB.getUrlLink());
 			ID3Util.checkStatementSubject(model, fileSite, FOAF.primaryTopic,
 					resourceMap.get(ID3Util.TRACK), BIBO.Document);
+			model.addStatement(resourceMap.get(ID3Util.TRACK), FOAF.homepage,
+					fileSite);
 		}
 	},
 	WOAR("Official artist/performer webpage", true)
@@ -985,6 +1002,9 @@ public enum FrameIdentifier
 			// we don't know at this moment, which type the source is of
 			model.addStatement(source, RDF.type,
 					org.ontoware.rdf2go.vocabulary.OWL.Thing);
+			// if its not the homepage, then it is "just" a page
+			model.addStatement(resourceMap.get(ID3Util.TRACK), FOAF.page,
+					sourceSite);
 
 		}
 	},
@@ -1057,7 +1077,7 @@ public enum FrameIdentifier
 		{
 			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
 			Model model = result.getModel();
-			
+
 			String description = wxxx.getDescription();
 			UserDefinedDescription userDefinedDescription = UserDefinedDescription
 					.getDescriptionByStringId(description);
@@ -1067,27 +1087,149 @@ public enum FrameIdentifier
 
 	// these frames are new, they appeared in the 2.4.0 version of the standard
 	// http://www.id3.org/id3v2.4.0-changes
-	ASPI("Audio seek point index", false), // not supported by NID3
-	EQU2("Equalisation (2)", false), // not supported by NID3
-	RVA2("Relative volume adjustment (2)", false), // not supported by NID3
-	SEEK("Seek frame", false), // not supported by NID3
-	SIGN("Signature frame", false), // not supported by NID3
-	TDEN("Encoding time", false), // not supported by NID3
-	TDOR("Original release time", false), // not supported by NID3
+	ASPI("Audio seek point index", false), // can probably be handled with Audio
+	// Features and Timeline Ontology;
+	// FIXME currently not supported by
+	// PMKB
+	EQU2("Equalisation (2)", false), // can probably be handled with Audio
+	// Features and Timeline Ontology; FIXME
+	// currently not supported by PMKB
+	RVA2("Relative volume adjustment (2)", false), // can probably be handled
+	// with Audio Features and
+	// Timeline Ontology; FIXME
+	// currently not supported
+	// by PMKB
+	SEEK("Seek frame", false), // // for internal ID3 tag handling, or?; FIXME
+	// currently not supported by PMKB
+	SIGN("Signature frame", false), // used WebID signatures here?; FIXME
+	// currently not supported by PMKB
+	TDEN("Encoding time", true)
+	{
+		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyTDEN encodingTimeFB = (FrameBodyTDEN) body;
+			Model model = result.getModel();
+
+			// relate to audio file signal
+			ID3Util.checkStatementObject(model, result.getDescribedUri(),
+					MO.encodes, resourceMap.get(ID3Util.SIGNAL), MO.Signal);
+
+			// a timestamp describing when the audio was encoded
+			Date encodingTime = ID3Util.id3v24timestampToDate(encodingTimeFB
+					.getFirstTextValue());
+			// FIXME: is Data date format == xsd data format?
+			model.addStatement(resourceMap.get(ID3Util.SIGNAL),
+					DCTERMS.created, ModelUtil.createLiteral(model,
+							encodingTime.toString(), XSD._date));
+		}
+	},
+	TDOR("Original release time", true)
+	{
+		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyTDOR originalReleaseTimeFB = (FrameBodyTDOR) body;
+			Model model = result.getModel();
+
+			// relate to "master signal"
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
+			ID3Util.checkStatementObject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
+					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.ORIGINALRELEASEEVENT), EVENT.factor,
+					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.ReleaseEvent);
+
+			// a timestamp describing when the original recording of the audio
+			// was released - that's why original release event (?)
+			Date originalReleaseTime = ID3Util
+					.id3v24timestampToDate(originalReleaseTimeFB
+							.getFirstTextValue());
+
+			ID3Util.createTimeInstant(model, resourceMap
+					.get(ID3Util.ORIGINALRELEASEEVENT), originalReleaseTime);
+
+		}
+	},
 	TDRC("Recording time", false)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			FrameBodyTDRC tdrc = (FrameBodyTDRC) body;
-			Date date = id3v24timestampToDate(tdrc.getFirstTextValue());
-			result.add(NID3.date, date);
+			FrameBodyTDRC recordingTimeFB = (FrameBodyTDRC) body;
+			Model model = result.getModel();
+
+			// relate to "master signal"
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.TRACK), MO.Signal);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RECORDING), MO.produced_signal, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.Recording);
+
+			// a timestamp describing when the audio was recorded
+			Date recordingTime = ID3Util.id3v24timestampToDate(recordingTimeFB
+					.getFirstTextValue());
+
+			ID3Util.createTimeInstant(model,
+					resourceMap.get(ID3Util.RECORDING), recordingTime);
 		}
 	},
-	TDRL("Release time", false), // not supported by NID3
-	TDTG("Tagging time", false), // not supported by NID3
-	TIPL("Involved people list", false), // not supported by NID3
+	TDRL("Release time", true)
+	{
+		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyTDRL releaseTimeFB = (FrameBodyTDRL) body;
+			Model model = result.getModel();
+
+			ID3Util.prepareReleaseEventConnection(model, resourceMap);
+
+			// a timestamp describing when the audio was first (!) released -
+			// how should I find the URI of the first (!) release now - I add it
+			// for the moment to RELEASEEVENT
+			Date releaseTime = ID3Util.id3v24timestampToDate(releaseTimeFB
+					.getFirstTextValue());
+
+			ID3Util.createTimeInstant(model, resourceMap.get(ID3Util.RELEASE),
+					releaseTime);
+			FrameBodyTIPL bla = (FrameBodyTIPL) body;
+		}
+	},
+	TDTG("Tagging time", false), // a timestamp describing then the audio was
+	// tagged; this is possible by using
+	// tags:Tagging, however, the we have to
+	// store the tags from TXXX:TAGS (if they
+	// mean these tags ;) ) somewhere and create
+	// a tags:Tagging based knowledge
+	// representation, FIXME: currently not
+	// supported by PMKB
+	TIPL("Involved people list", true)
+	{
+		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
+				HashMap<URI, String> id3v1props, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyTIPL tipl = (FrameBodyTIPL) body;
+			Model model = result.getModel();
+
+			ValuePairs valuePairs = tipl.getPairing();
+			List<Pair> pairList = valuePairs.getMapping();
+			for (Pair pair : pairList)
+			{
+				UserDefinedDescription userDefinedDescription = UserDefinedDescription
+						.getDescriptionByStringId(pair.getKey());
+				userDefinedDescription.process(result, resourceMap, pair.getValue());
+			}
+		}
+	},
 	TMCL("Musician credits list", false), // not supported by NID3
 	TMOO("Mood", true)
 	{
@@ -1098,13 +1240,14 @@ public enum FrameIdentifier
 			FrameBodyTMOO moodFB = (FrameBodyTMOO) body;
 			Model model = result.getModel();
 
-			// relate to master signal
+			// relate to "master signal"
 			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.SIGNAL), MO.published_as, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
 
-			ID3Util.addStringLiteral(model, resourceMap.get(ID3Util.SIGNAL),
-					AO.mood, moodFB.getFirstTextValue());
+			ID3Util.addStringLiteral(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), AO.mood, moodFB
+					.getFirstTextValue());
 		}
 	},
 	TPRO("Produced notice", false), // not supported by NID3

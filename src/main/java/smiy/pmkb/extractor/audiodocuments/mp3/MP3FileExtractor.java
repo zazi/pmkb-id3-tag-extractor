@@ -217,6 +217,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 
 		Resource trackArtist = ModelUtil.generateRandomResource(model);
 		Resource signal = ModelUtil.generateRandomResource(model);
+		Resource masterSignal = ModelUtil.generateRandomResource(model);
 		Resource musicalWork = ModelUtil.generateRandomResource(model);
 		Resource lyrics = ModelUtil.generateRandomResource(model);
 		Resource originalSignal = ModelUtil.generateRandomResource(model);
@@ -235,9 +236,12 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource albumArtist = ModelUtil.generateRandomResource(model);
 		Resource signalGroup = ModelUtil.generateRandomResource(model);
 		Resource label = ModelUtil.generateRandomResource(model);
+		Resource originalReleaseEvent = ModelUtil.generateRandomResource(model);
+		Resource recording = ModelUtil.generateRandomResource(model);
 
 		resourceMap.put(ID3Util.TRACKARTIST, trackArtist);
 		resourceMap.put(ID3Util.SIGNAL, signal);
+		resourceMap.put(ID3Util.MASTERSIGNAL, masterSignal);
 		resourceMap.put(ID3Util.MUSICALWORK, musicalWork);
 		resourceMap.put(ID3Util.LYRICS, lyrics);
 		resourceMap.put(ID3Util.ORIGINALSIGNAL, originalSignal);
@@ -256,6 +260,8 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		resourceMap.put(ID3Util.ALBUMARTIST, albumArtist);
 		resourceMap.put(ID3Util.SIGNALGROUP, signalGroup);
 		resourceMap.put(ID3Util.LABEL, label);
+		resourceMap.put(ID3Util.ORIGINALRELEASEEVENT, originalReleaseEvent);
+		resourceMap.put(ID3Util.RECORDING, recording);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
