@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:bibo="http://purl.org/ontology/bibo/"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:dcterms="http://purl.org/dc/terms/"
+   xmlns:foaf="http://xmlns.com/foaf/0.1/"
+   xmlns:is="http://purl.org/ontology/is/core#"
+   xmlns:isct="http://purl.org/ontology/is/ctypes/"
+   xmlns:isi="http://purl.org/ontology/is/inst/"
+   xmlns:isq="http://purl.org/ontology/is/quality/"
+   xmlns:ist="http://purl.org/ontology/is/types/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+   xml:base="http://purl.org/ontology/is/inst/">
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/bbc">
+    <dc:description xml:lang="en">The largest broadcasting organization in the world. Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">BBC</dc:title>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/encyclopedia"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/knowledge_base"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://bbc.co.uk/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/dbpedia">
+    <dc:description xml:lang="en">DBpedia is a community effort to extract structured information from Wikipedia and to make this information available on the Web.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">DBPedia</dc:title>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/mixed"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/encyclopedia"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/knowledge_base"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://dbpedia.org/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/discogs">
+    <dc:description xml:lang="en">A website and database of information about music recordings, and one of the largest online databases
+of electronic music releases and is believed to be the largest online database of releases on vinyl media. Modelled here as
+information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Discogs</dc:title>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/encyclopedia"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/knowledge_base"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://discogs.com/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/echonest">
+    <dc:description xml:lang="en">The Echo Nest provides a series of web based solutions for better search, recommendation and 
+interactivity on the music web (including musicial fingerprinting). Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EchoNest</dc:title>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/knowledge_base"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/recommender_service"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://echonest.com/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/freebase">
+    <dc:description xml:lang="en">An online collection of structured data harvested from many sources. Modelled here as information
+service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Freebase</dc:title>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://freebase.com/"/>
+  </is:InfoService>
+  <bibo:Document rdf:about="http://purl.org/ontology/is/inst/infoserviceindividuals.rdf">
+    <dc:creator rdf:resource="http://foaf.me/zazi#me"/>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2010-06-30T14:56:52+01:00</dc:date>
+    <dc:description xml:lang="en">This document includes currently some is:InfoService individuals for proof-of-concept
+demonstration.</dc:description>
+    <dc:title xml:lang="en">Information Service Individuals</dc:title>
+    <rdfs:seeAlso rdf:resource="http://purl.org/ontology/is/infoservice.html"/>
+  </bibo:Document>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/lastfm">
+    <dc:description xml:lang="en">A popular Internet radio site for streaming music. Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Last.fm</dc:title>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/community"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/recommender_service"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/social_network_service"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://last.fm/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/musicbrainz">
+    <dc:description xml:lang="en">An open content music database. Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">MusicBrainz</dc:title>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Acoustic_fingerprinting"/>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Free_websites"/>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Library_2.0"/>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Metadata_registry"/>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:MusicBrainz"/>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Online_encyclopedias"/>
+    <dcterms:subject rdf:resource="http://dbpedia.org/resource/Category:Online_music_and_lyrics_databases"/>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/mixed"/>
+    <is:info_service_quality rdf:resource="http://purl.org/ontology/is/quality/good"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/encyclopedia"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/knowledge_base"/>
+    <is:main_subject rdf:resource="http://dbpedia.org/resource/Category:Music"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://musicbrainz.org/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/myspace">
+    <dc:description xml:lang="en">A social networking website with a great pool of musician profiles. Modelled here as information
+service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">MySpace</dc:title>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/community"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/social_network_service"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://myspace.com/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/pandora">
+    <dc:description xml:lang="en">An automated music recommendation service. Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pandora</dc:title>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/expert"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/recommender_service"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://pandora.com/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/spotify">
+    <dc:description xml:lang="en">A proprietary peer-to-peer music streaming service. Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Spotify</dc:title>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/expert"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/recommender_service"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://spotify.com/"/>
+  </is:InfoService>
+  <is:InfoService rdf:about="http://purl.org/ontology/is/inst/wikipedia">
+    <dc:description xml:lang="en">A free, web-based, collaborative, multilingual encyclopedia project. Modelled here as information service.</dc:description>
+    <dc:title rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wikipedia</dc:title>
+    <is:info_service_contributor_type rdf:resource="http://purl.org/ontology/is/ctypes/mixed"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/encyclopedia"/>
+    <is:info_service_type rdf:resource="http://purl.org/ontology/is/types/knowledge_base"/>
+    <rdfs:isDefinedBy rdf:resource="http://purl.org/ontology/is/inst/"/>
+    <foaf:homepage rdf:resource="http://wikipedia.org/"/>
+  </is:InfoService>
+</rdf:RDF>

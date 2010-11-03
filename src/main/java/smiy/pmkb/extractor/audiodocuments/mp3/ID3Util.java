@@ -38,6 +38,7 @@ import smiy.pmkb.vocabulary.TL;
 public class ID3Util
 {
 	public static final String TRACK = "track";
+	public static final String TRACKARTIST = "trackArtist";
 	public static final String MUSICALBUM = "musicAlbum";
 	public static final String RELEASE = "release";
 	public static final String RELEASEEVENT = "releaseEvent";
@@ -58,6 +59,7 @@ public class ID3Util
 	public static final String SERVICE = "service";
 	public static final String ALBUMARTIST = "albumArtist";
 	public static final String SIGNALGROUP = "signalGroup";
+	public static final String LABEL = "label";
 
 	/**
 	 * As taken from the timestamp definition published at <br/>
@@ -365,5 +367,24 @@ public class ID3Util
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void preparePublisherConnection(Model model, HashMap<String, Resource> resourceMap)
+	{
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+				.get(ID3Util.TRACK), MO.Record);
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.RELEASE), MO.record, resourceMap
+				.get(ID3Util.MUSICALBUM), MO.Release);
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
+				.get(ID3Util.RELEASE), MO.ReleaseEvent);
+
+		// FIXME: associates publisher explicitly as label, however it can
+		// also be a person
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.RELEASEEVENT), MO.label, resourceMap
+				.get(ID3Util.LABEL), MO.Label);
 	}
 }

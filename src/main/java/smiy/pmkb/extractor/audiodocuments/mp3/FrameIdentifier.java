@@ -79,6 +79,7 @@ import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
+import org.ontoware.rdf2go.vocabulary.OWL;
 import org.ontoware.rdf2go.vocabulary.RDF;
 import org.ontoware.rdf2go.vocabulary.RDFS;
 import org.ontoware.rdf2go.vocabulary.XSD;
@@ -651,8 +652,12 @@ public enum FrameIdentifier
 
 			// FIXME: handle multiple soloists/lead performers ("/" separated)
 			// and mark them somehow explicitly
-			ID3Util.checkArtist(model, soloistFB.getFirstTextValue(),
-					resourceMap.get(ID3Util.TRACK));
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					DCTERMS.creator, resourceMap.get(ID3Util.TRACKARTIST),
+					MO.MusicArtist);
+			ID3Util.addStringLiteral(model, resourceMap
+					.get(ID3Util.TRACKARTIST), FOAF.name, soloistFB
+					.getFirstTextValue());
 			id3v1props.remove(NID3.leadArtist);
 		}
 	},
@@ -746,20 +751,10 @@ public enum FrameIdentifier
 			FrameBodyTPUB publisherFB = (FrameBodyTPUB) body;
 			Model model = result.getModel();
 
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-					.get(ID3Util.TRACK), MO.Record);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.RELEASE), MO.record, resourceMap
-					.get(ID3Util.MUSICALBUM), MO.Release);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
-					.get(ID3Util.RELEASE), MO.ReleaseEvent);
+			ID3Util.preparePublisherConnection(model, resourceMap);
 
-			// FIXME: associates publisher explicitly as label, however it can
-			// also be a person
-			ID3Util.addAgent(model, resourceMap.get(ID3Util.RELEASEEVENT),
-					MO.label, MO.Label, publisherFB.getFirstTextValue());
+			ID3Util.addStringLiteral(model, resourceMap.get(ID3Util.LABEL),
+					FOAF.name, publisherFB.getFirstTextValue());
 		}
 	},
 	TRCK("Track number/Position in set", true)
@@ -933,9 +928,8 @@ public enum FrameIdentifier
 			// FIXME: a file (!) specific webpage? - currently track specific
 			// webpage
 			Resource fileSite = model.createURI(fileSiteFB.getUrlLink());
-			model.addStatement(fileSite, FOAF.primaryTopic, resourceMap
-					.get(ID3Util.TRACK));
-			model.addStatement(fileSite, RDF.type, BIBO.Document);
+			ID3Util.checkStatementSubject(model, fileSite, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.TRACK), BIBO.Document);
 		}
 	},
 	WOAR("Official artist/performer webpage", true)
@@ -944,23 +938,54 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWOAR) body).getUrlLink());
-			result.add(NID3.officialArtistWebpage, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWOAR artistSiteFB = (FrameBodyWOAR) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					DCTERMS.creator, resourceMap.get(ID3Util.TRACKARTIST),
+					MO.MusicArtist);
+
+			// FIXME: how should I know, which artist webpage belongs to which
+			// artist? - currently I add these page to one (!) track artist :\
+			Resource artistSite = model.createURI(artistSiteFB.getUrlLink());
+			model.addStatement(resourceMap.get(ID3Util.TRACKARTIST),
+					FOAF.homepage, artistSite);
+			model.addStatement(artistSite, FOAF.primaryTopic, resourceMap
+					.get(ID3Util.TRACKARTIST));
+			model.addStatement(artistSite, RDF.type, BIBO.Document);
 		}
 	}, // very unspecific, because this frame can also exist multiple times, so
-		// how should one associate the correct artist to the correct webpage?
+	// how should one associate the correct artist to the correct webpage?
 	WOAS("Official audio source webpage", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWOAS) body).getUrlLink());
-			result.add(NID3.officialAudioSourceWebpage, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWOAS sourceSiteFB = (FrameBodyWOAS) body;
+			Model model = result.getModel();
+
+			// FIXME: a URL pointing at the official webpage for the source of
+			// the
+			// audio file, e.g. a movie (?) - we do not have a URI for the
+			// source :\
+			Resource sourceSite = model.createURI(sourceSiteFB.getUrlLink());
+			// only foaf:topic here!
+			model.addStatement(sourceSite, FOAF.topic, resourceMap
+					.get(ID3Util.TRACK));
+			model.addStatement(sourceSite, RDF.type, BIBO.Document);
+
+			Resource source = ModelUtil.generateRandomResource(model);
+			// dcterms:subject (dcterms:source is not really appropriated,
+			// because "...derived from ...")
+			model.addStatement(source, DCTERMS.subject, resourceMap
+					.get(ID3Util.TRACK));
+			// primary topic of the source site!
+			model.addStatement(sourceSite, FOAF.primaryTopic, source);
+			// we don't know at this moment, which type the source is of
+			model.addStatement(source, RDF.type,
+					org.ontoware.rdf2go.vocabulary.OWL.Thing);
+
 		}
 	},
 	WORS("Official Internet radio station homepage", true)
@@ -969,10 +994,21 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWORS) body).getUrlLink());
-			result.add(NID3.officialInternetRadioStationHomepage, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWORS internetRadioStationSiteFB = (FrameBodyWORS) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStream(model, result, resourceMap);
+			ID3Util.prepareServiceOutletConnection(model, resourceMap);
+
+			Resource internetRadioStationSite = model
+					.createURI(internetRadioStationSiteFB.getUrlLink());
+			model.addStatement(resourceMap.get(ID3Util.OUTLET), FOAF.homepage,
+					internetRadioStationSite);
+			model.addStatement(internetRadioStationSite, RDF.type,
+					BIBO.Document);
+			model.addStatement(internetRadioStationSite, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.OUTLET));
+
 		}
 	},
 	WPAY("Payment", true)
@@ -981,10 +1017,16 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWPAY) body).getUrlLink());
-			result.add(NID3.paymentURL, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWPAY paymentSiteFB = (FrameBodyWPAY) body;
+			Model model = result.getModel();
+
+			Resource paymentSite = model.createURI(paymentSiteFB.getUrlLink());
+			model.addStatement(resourceMap.get(ID3Util.TRACK),
+					MO.paid_download, paymentSite);
+			// FIXME: foaf:primaryTopic ?
+			ID3Util.checkStatementSubject(model, paymentSite,
+					FOAF.primaryTopic, resourceMap.get(ID3Util.TRACK),
+					BIBO.Document);
 		}
 	},
 	WPUB("Publishers official webpage", true)
@@ -993,10 +1035,18 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			Resource resource = result.getModel().createURI(
-					((FrameBodyWPUB) body).getUrlLink());
-			result.add(NID3.publishersWebpage, resource);
-			result.getModel().addStatement(resource, RDF.type, RDFS.Resource);
+			FrameBodyWPUB publisherSiteFB = (FrameBodyWPUB) body;
+			Model model = result.getModel();
+
+			ID3Util.preparePublisherConnection(model, resourceMap);
+
+			Resource publisherSite = model.createURI(publisherSiteFB
+					.getUrlLink());
+			model.addStatement(resourceMap.get(ID3Util.LABEL), FOAF.homepage,
+					publisherSite);
+			model.addStatement(publisherSite, RDF.type, BIBO.Document);
+			model.addStatement(publisherSite, FOAF.primaryTopic, resourceMap
+					.get(ID3Util.LABEL));
 		}
 	},
 	WXXX("User defined URL link frame", false)
@@ -1005,17 +1055,13 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			FrameBodyWXXX txxx = (FrameBodyWXXX) body;
-			String description = txxx.getDescription();
-			String text = txxx.getUrlLink();
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
 			Model model = result.getModel();
-			Resource resource = ModelUtil.generateRandomResource(model);
-			model.addStatement(resource, RDF.type, NID3.UserDefinedURLFrame);
-			model.addStatement(resource, NID3.userDefinedFrameDescription,
-					description);
-			model.addStatement(resource, NID3.userDefinedFrameValue, text);
-			model.addStatement(result.getDescribedUri(), NID3.userDefinedFrame,
-					resource);
+			
+			String description = wxxx.getDescription();
+			UserDefinedDescription userDefinedDescription = UserDefinedDescription
+					.getDescriptionByStringId(description);
+			userDefinedDescription.process(body, result, resourceMap);
 		}
 	},
 

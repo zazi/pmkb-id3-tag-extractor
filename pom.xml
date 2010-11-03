@@ -164,6 +164,20 @@
 						<outputDir>${vocabulary.output.dir}</outputDir>
 						<namespaceStrict>true</namespaceStrict>
 					</vocabulary>
+					<vocabulary>
+						<ontology>${vocabulary.input.dir}/infoservice.owl</ontology>
+						<namespace>http://purl.org/ontology/is/core#</namespace>
+						<javaClass>${vocabulary.java.package}.IS</javaClass>
+						<outputDir>${vocabulary.output.dir}</outputDir>
+						<namespaceStrict>true</namespaceStrict>
+					</vocabulary>
+					<vocabulary>
+						<ontology>${vocabulary.input.dir}/infoserviceindividuals.rdf</ontology>
+						<namespace>http://purl.org/ontology/is/inst/</namespace>
+						<javaClass>${vocabulary.java.package}.ISI</javaClass>
+						<outputDir>${vocabulary.output.dir}</outputDir>
+						<namespaceStrict>true</namespaceStrict>
+					</vocabulary>
   				</vocabularies>
   			</configuration>
   			<executions>

@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
+import org.jaudiotagger.tag.id3.framebody.FrameBodyWXXX;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.vocabulary.RDF;
@@ -19,11 +20,14 @@ import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
 import smiy.pmkb.vocabulary.AO;
+import smiy.pmkb.vocabulary.BIBO;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.FRBR;
+import smiy.pmkb.vocabulary.IS;
+import smiy.pmkb.vocabulary.ISI;
 import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.WGS84;
 
@@ -372,6 +376,132 @@ public enum UserDefinedDescription
 
 			ID3Util.checkBPM(model, resourceMap, Float.valueOf(
 					txxx.getFirstTextValue()).floatValue());
+		}
+	},
+	URL_DISCOGS_ARTIST_SITE(FrameBodyWXXX.URL_DISCOGS_ARTIST_SITE, true)
+	{
+		public void process(AbstractTagFrameBody body, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					DCTERMS.creator, resourceMap.get(ID3Util.TRACKARTIST),
+					MO.MusicArtist);
+
+			Resource discogsArtistSite = model.createURI(wxxx.getUrlLink());
+			model.addStatement(discogsArtistSite, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.TRACKARTIST));
+			model.addStatement(discogsArtistSite, RDF.type, BIBO.Document);
+			model.addStatement(discogsArtistSite, IS.info_service, ISI.discogs);
+		}
+	},
+	URL_DISCOGS_RELEASE_SITE(FrameBodyWXXX.URL_DISCOGS_RELEASE_SITE, true)
+	{
+		public void process(AbstractTagFrameBody body, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RELEASE), MO.record, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.Release);
+
+			Resource discogsReleaseSite = model.createURI(wxxx.getUrlLink());
+			model.addStatement(discogsReleaseSite, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.RELEASE));
+			model.addStatement(discogsReleaseSite, RDF.type, BIBO.Document);
+			model
+					.addStatement(discogsReleaseSite, IS.info_service,
+							ISI.discogs);
+		}
+	},
+	URL_LYRICS_SITE(FrameBodyWXXX.URL_LYRICS_SITE, true)
+	{
+		public void process(AbstractTagFrameBody body, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					MO.publication_of, resourceMap.get(ID3Util.LYRICS),
+					MO.Lyrics);
+			Resource lyricsSite = model.createURI(wxxx.getUrlLink());
+			model.addStatement(lyricsSite, FOAF.primaryTopic, resourceMap
+					.get(ID3Util.LYRICS));
+			model.addStatement(lyricsSite, RDF.type, BIBO.Document);
+		}
+	},
+	URL_OFFICIAL_RELEASE_SITE(FrameBodyWXXX.URL_OFFICIAL_RELEASE_SITE, true)
+	{
+		public void process(AbstractTagFrameBody body, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RELEASE), MO.record, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.Release);
+
+			Resource releaseSite = model.createURI(wxxx.getUrlLink());
+			model.addStatement(releaseSite, FOAF.primaryTopic, resourceMap
+					.get(ID3Util.RELEASE));
+			model.addStatement(releaseSite, RDF.type, BIBO.Document);
+			model.addStatement(resourceMap.get(ID3Util.RELEASE), FOAF.homepage,
+					releaseSite);
+		}
+	},
+	URL_WIKIPEDIA_ARTIST_SITE(FrameBodyWXXX.URL_WIKIPEDIA_ARTIST_SITE, true)
+	{
+		public void process(AbstractTagFrameBody body, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
+					DCTERMS.creator, resourceMap.get(ID3Util.TRACKARTIST),
+					MO.MusicArtist);
+
+			Resource wikipediaArtistSite = model.createURI(wxxx.getUrlLink());
+			model.addStatement(wikipediaArtistSite, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.TRACKARTIST));
+			model.addStatement(wikipediaArtistSite, RDF.type, BIBO.Document);
+			model.addStatement(wikipediaArtistSite, IS.info_service,
+					ISI.wikipedia);
+		}
+	},
+	URL_WIKIPEDIA_RELEASE_SITE(FrameBodyWXXX.URL_WIKIPEDIA_RELEASE_SITE, true)
+	{
+		public void process(AbstractTagFrameBody body, RDFContainer result,
+				HashMap<String, Resource> resourceMap)
+		{
+			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
+			Model model = result.getModel();
+
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.track, resourceMap
+					.get(ID3Util.TRACK), MO.Record);
+			ID3Util.checkStatementSubject(model, resourceMap
+					.get(ID3Util.RELEASE), MO.record, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.Release);
+
+			Resource wikipediaReleaseSite = model.createURI(wxxx.getUrlLink());
+			model.addStatement(wikipediaReleaseSite, FOAF.primaryTopic,
+					resourceMap.get(ID3Util.RELEASE));
+			model.addStatement(wikipediaReleaseSite, RDF.type, BIBO.Document);
+			model.addStatement(wikipediaReleaseSite, IS.info_service,
+					ISI.wikipedia);
 		}
 	};
 

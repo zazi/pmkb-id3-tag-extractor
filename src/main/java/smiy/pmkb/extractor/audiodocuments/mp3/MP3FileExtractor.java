@@ -45,7 +45,9 @@ import org.slf4j.LoggerFactory;
 
 import smiy.pmkb.util.Namespaces;
 import smiy.pmkb.vocabulary.DC;
+import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.EVENT;
+import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.MFO;
 import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.TIME;
@@ -213,6 +215,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 	{
 		Model model = result.getModel();
 
+		Resource trackArtist = ModelUtil.generateRandomResource(model);
 		Resource signal = ModelUtil.generateRandomResource(model);
 		Resource musicalWork = ModelUtil.generateRandomResource(model);
 		Resource lyrics = ModelUtil.generateRandomResource(model);
@@ -231,7 +234,9 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		Resource service = ModelUtil.generateRandomResource(model);
 		Resource albumArtist = ModelUtil.generateRandomResource(model);
 		Resource signalGroup = ModelUtil.generateRandomResource(model);
+		Resource label = ModelUtil.generateRandomResource(model);
 
+		resourceMap.put(ID3Util.TRACKARTIST, trackArtist);
 		resourceMap.put(ID3Util.SIGNAL, signal);
 		resourceMap.put(ID3Util.MUSICALWORK, musicalWork);
 		resourceMap.put(ID3Util.LYRICS, lyrics);
@@ -250,6 +255,7 @@ public class MP3FileExtractor extends AbstractFileExtractor
 		resourceMap.put(ID3Util.SERVICE, service);
 		resourceMap.put(ID3Util.ALBUMARTIST, albumArtist);
 		resourceMap.put(ID3Util.SIGNALGROUP, signalGroup);
+		resourceMap.put(ID3Util.LABEL, label);
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
@@ -305,8 +311,11 @@ public class MP3FileExtractor extends AbstractFileExtractor
 			String value = entry.getValue();
 			if (uri.equals(NID3.leadArtist))
 			{
-				ID3Util.checkArtist(model, value, resourceMap
-						.get(ID3Util.TRACK));
+				ID3Util.checkStatementObject(model, resourceMap
+						.get(ID3Util.TRACK), DCTERMS.creator, resourceMap
+						.get(ID3Util.TRACKARTIST), MO.MusicArtist);
+				ID3Util.addStringLiteral(model, resourceMap
+						.get(ID3Util.TRACKARTIST), FOAF.name, value);
 				continue;
 			}
 			else if (uri.equals(NID3.albumTitle))
