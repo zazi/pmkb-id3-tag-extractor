@@ -21,13 +21,11 @@ import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
 import smiy.pmkb.vocabulary.AO;
-import smiy.pmkb.vocabulary.BIBO;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.FRBR;
-import smiy.pmkb.vocabulary.IS;
 import smiy.pmkb.vocabulary.ISI;
 import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.WGS84;
@@ -375,14 +373,10 @@ public enum UserDefinedDescription
 					DCTERMS.creator, resourceMap.get(ID3Util.TRACKARTIST),
 					MO.MusicArtist);
 
-			Resource discogsArtistSite = model.createURI(wxxx.getUrlLink());
-			model.addStatement(discogsArtistSite, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.TRACKARTIST));
-			model.addStatement(discogsArtistSite, RDF.type, BIBO.Document);
-			model.addStatement(discogsArtistSite, IS.info_service, ISI.discogs);
 			// if its not the homepage, then it is "just" a page
-			model.addStatement(resourceMap.get(ID3Util.TRACKARTIST), FOAF.page,
-					discogsArtistSite);
+			ID3Util.createPageLinkWithInfoService(model, wxxx.getUrlLink(),
+					resourceMap.get(ID3Util.TRACKARTIST), ISI.discogs,
+					FOAF.page);
 		}
 	},
 	URL_DISCOGS_RELEASE_SITE(FrameBodyWXXX.URL_DISCOGS_RELEASE_SITE, true)
@@ -400,16 +394,9 @@ public enum UserDefinedDescription
 					.get(ID3Util.RELEASE), MO.record, resourceMap
 					.get(ID3Util.MUSICALBUM), MO.Release);
 
-			Resource discogsReleaseSite = model.createURI(wxxx.getUrlLink());
-			model.addStatement(discogsReleaseSite, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.RELEASE));
-			model.addStatement(discogsReleaseSite, RDF.type, BIBO.Document);
-			model
-					.addStatement(discogsReleaseSite, IS.info_service,
-							ISI.discogs);
 			// if its not the homepage, then it is "just" a page
-			model.addStatement(resourceMap.get(ID3Util.RELEASE), FOAF.page,
-					discogsReleaseSite);
+			ID3Util.createPageLinkWithInfoService(model, wxxx.getUrlLink(),
+					resourceMap.get(ID3Util.RELEASE), ISI.discogs, FOAF.page);
 		}
 	},
 	URL_LYRICS_SITE(FrameBodyWXXX.URL_LYRICS_SITE, true)
@@ -423,13 +410,10 @@ public enum UserDefinedDescription
 			ID3Util.checkStatementObject(model, resourceMap.get(ID3Util.TRACK),
 					MO.publication_of, resourceMap.get(ID3Util.LYRICS),
 					MO.Lyrics);
-			Resource lyricsSite = model.createURI(wxxx.getUrlLink());
-			model.addStatement(lyricsSite, FOAF.primaryTopic, resourceMap
-					.get(ID3Util.LYRICS));
-			model.addStatement(lyricsSite, RDF.type, BIBO.Document);
+
 			// if its not the homepage, then it is "just" a page
-			model.addStatement(resourceMap.get(ID3Util.LYRICS), FOAF.page,
-					lyricsSite);
+			ID3Util.createPageLink(model, wxxx.getUrlLink(), resourceMap
+					.get(ID3Util.LYRICS), FOAF.page);
 		}
 	},
 	URL_OFFICIAL_RELEASE_SITE(FrameBodyWXXX.URL_OFFICIAL_RELEASE_SITE, true)
@@ -447,12 +431,8 @@ public enum UserDefinedDescription
 					.get(ID3Util.RELEASE), MO.record, resourceMap
 					.get(ID3Util.MUSICALBUM), MO.Release);
 
-			Resource releaseSite = model.createURI(wxxx.getUrlLink());
-			model.addStatement(releaseSite, FOAF.primaryTopic, resourceMap
-					.get(ID3Util.RELEASE));
-			model.addStatement(releaseSite, RDF.type, BIBO.Document);
-			model.addStatement(resourceMap.get(ID3Util.RELEASE), FOAF.homepage,
-					releaseSite);
+			ID3Util.createPageLink(model, wxxx.getUrlLink(), resourceMap
+					.get(ID3Util.RELEASE), FOAF.homepage);
 		}
 	},
 	URL_WIKIPEDIA_ARTIST_SITE(FrameBodyWXXX.URL_WIKIPEDIA_ARTIST_SITE, true)
@@ -467,15 +447,10 @@ public enum UserDefinedDescription
 					DCTERMS.creator, resourceMap.get(ID3Util.TRACKARTIST),
 					MO.MusicArtist);
 
-			Resource wikipediaArtistSite = model.createURI(wxxx.getUrlLink());
-			model.addStatement(wikipediaArtistSite, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.TRACKARTIST));
-			model.addStatement(wikipediaArtistSite, RDF.type, BIBO.Document);
-			model.addStatement(wikipediaArtistSite, IS.info_service,
-					ISI.wikipedia);
 			// if its not the homepage, then it is "just" a page
-			model.addStatement(resourceMap.get(ID3Util.TRACKARTIST), FOAF.page,
-					wikipediaArtistSite);
+			ID3Util.createPageLinkWithInfoService(model, wxxx.getUrlLink(),
+					resourceMap.get(ID3Util.TRACKARTIST), ISI.wikipedia,
+					FOAF.page);
 		}
 	},
 	URL_WIKIPEDIA_RELEASE_SITE(FrameBodyWXXX.URL_WIKIPEDIA_RELEASE_SITE, true)
@@ -493,15 +468,9 @@ public enum UserDefinedDescription
 					.get(ID3Util.RELEASE), MO.record, resourceMap
 					.get(ID3Util.MUSICALBUM), MO.Release);
 
-			Resource wikipediaReleaseSite = model.createURI(wxxx.getUrlLink());
-			model.addStatement(wikipediaReleaseSite, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.RELEASE));
-			model.addStatement(wikipediaReleaseSite, RDF.type, BIBO.Document);
-			model.addStatement(wikipediaReleaseSite, IS.info_service,
-					ISI.wikipedia);
 			// if its not the homepage, then it is "just" a page
-			model.addStatement(resourceMap.get(ID3Util.RELEASE), FOAF.page,
-					wikipediaReleaseSite);
+			ID3Util.createPageLinkWithInfoService(model, wxxx.getUrlLink(),
+					resourceMap.get(ID3Util.RELEASE), ISI.wikipedia, FOAF.page);
 		}
 	},
 	ARRANGER(FrameBodyTIPL.ARRANGER, true)

@@ -14,8 +14,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
 
 import org.jaudiotagger.tag.datatype.Pair;
 import org.jaudiotagger.tag.datatype.PairedTextEncodedStringNullTerminated.ValuePairs;
@@ -24,31 +22,23 @@ import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
 import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyAPIC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyCOMM;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyGEOB;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyIPLS;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyPCNT;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyPOPM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTALB;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTBPM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTCOM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTCON;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTCOP;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDAT;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDEN;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDOR;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDRC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTDRL;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTENC;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTEXT;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTFLT;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTIPL;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTIT1;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTIT2;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTIT3;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTKEY;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTLAN;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTLEN;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTMED;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTMOO;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTOAL;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTOFN;
@@ -63,14 +53,11 @@ import org.jaudiotagger.tag.id3.framebody.FrameBodyTPE4;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTPOS;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTPUB;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTRCK;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTRDA;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTRSN;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTRSO;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTSRC;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyTSSE;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTYER;
-import org.jaudiotagger.tag.id3.framebody.FrameBodyUFID;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyUSLT;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyWCOM;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyWCOP;
@@ -81,38 +68,26 @@ import org.jaudiotagger.tag.id3.framebody.FrameBodyWORS;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyWPAY;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyWPUB;
 import org.jaudiotagger.tag.id3.framebody.FrameBodyWXXX;
-import org.ontoware.rdf2go.exception.ModelException;
-import org.ontoware.rdf2go.exception.ModelRuntimeException;
 import org.ontoware.rdf2go.model.Model;
 import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
-import org.ontoware.rdf2go.vocabulary.OWL;
 import org.ontoware.rdf2go.vocabulary.RDF;
-import org.ontoware.rdf2go.vocabulary.RDFS;
-import org.ontoware.rdf2go.vocabulary.XSD;
 import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
+import org.semanticdesktop.aperture.vocabulary.NID3;
 import org.semanticdesktop.aperture.vocabulary.NIE;
-
-import com.sun.org.apache.bcel.internal.generic.MONITORENTER;
 
 import smiy.pmkb.util.Namespaces;
 import smiy.pmkb.vocabulary.AO;
 import smiy.pmkb.vocabulary.BIBO;
-import smiy.pmkb.vocabulary.CO;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
-import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.FRBR;
 import smiy.pmkb.vocabulary.MO;
-import smiy.pmkb.vocabulary.MT;
-import smiy.pmkb.vocabulary.PBO;
 import smiy.pmkb.vocabulary.PO;
-import smiy.pmkb.vocabulary.TIME;
 import smiy.pmkb.vocabulary.TL;
-import smiy.pmkb.vocabulary.WGS84;
 
 /**
  * An enumeration of ID3v2 frames defined in the standards.
@@ -161,8 +136,8 @@ public enum FrameIdentifier
 			String resultString = (addDescription ? description : "")
 					+ (addDescription && addText ? "\n" : "")
 					+ (addText ? text : "");
-			model.addStatement(resourceMap.get(ID3Util.TRACK), DC.description,
-					ModelUtil.createLiteral(model, resultString));
+			ID3Util.addStringLiteral(model, resourceMap.get(ID3Util.TRACK),
+					DC.description, resultString);
 			id3v1props.remove(DC.description);
 		}
 	},
@@ -218,15 +193,10 @@ public enum FrameIdentifier
 		{
 			FrameBodyPCNT playcountFB = (FrameBodyPCNT) body;
 			Model model = result.getModel();
-			Resource playcounter = ModelUtil.generateRandomResource(model);
-			model.addStatement(playcounter, RDF.type, PBO.PlayBackCounter);
-			model.addStatement(playcounter, CO.count, ModelUtil.createLiteral(
-					model, Integer.getInteger(
-							Long.valueOf(playcountFB.getCounter()).toString())
-							.intValue()));
-			model.addStatement(playcounter, DC.title, ModelUtil.createLiteral(
-					model, "ID3 Play counter"));
-			model.addStatement(playcounter, PBO.media_object, resourceMap
+
+			ID3Util.createPlayCounter(model, Integer.getInteger(
+					Long.valueOf(playcountFB.getCounter()).toString())
+					.intValue(), "ID3 play counter", resourceMap
 					.get(ID3Util.TRACK));
 		}
 	}, // acts as general play counter
@@ -238,23 +208,17 @@ public enum FrameIdentifier
 		{
 			FrameBodyPOPM popularimeterFB = (FrameBodyPOPM) body;
 			Model model = result.getModel();
-			Resource popularimeter = ModelUtil.generateRandomResource(model);
-			model.addStatement(popularimeter, RDF.type, PBO.PlayBackCounter);
-			model.addStatement(popularimeter, CO.count, ModelUtil
-					.createLiteral(model, Integer.getInteger(
-							Long.valueOf(popularimeterFB.getCounter())
-									.toString()).intValue()));
-			model.addStatement(popularimeter, DC.title, ModelUtil
-					.createLiteral(model, "ID3 Play counter"));
+
+			// popularimeter is currently related with the item
+			ID3Util.createPlayCounter(model, Integer.getInteger(
+					Long.valueOf(popularimeterFB.getCounter()).toString())
+					.intValue(), "personal play counter", result
+					.getDescribedUri());
 
 			Resource person = ModelUtil.generateRandomResource(model);
 			model.addStatement(person, RDF.type, FOAF.Person);
 			model.addStatement(person, FOAF.mbox, new URIImpl("mailto:"
 					+ popularimeterFB.getEmailToUser()));
-
-			// popularimeter is currently related with the item
-			model.addStatement(popularimeter, PBO.media_object, result
-					.getDescribedUri());
 		}
 	}, // acts as personal play counter; that means, multiple POPM frames can
 	// exist in one ID3 tag (the rating parameter isn't currently handled)
@@ -436,8 +400,9 @@ public enum FrameIdentifier
 
 			// FIXME: a title can also be item specific (subjective, personal)
 			// -> this is currently the case
-			model.addStatement(result.getDescribedUri(), DC.title, ModelUtil
-					.createLiteral(model, titleFB.getFirstTextValue()));
+			ID3Util.addStringLiteral(model, result.getDescribedUri(), DC.title,
+					titleFB.getFirstTextValue());
+
 			id3v1props.remove(DC.title);
 		}
 	},
@@ -507,9 +472,8 @@ public enum FrameIdentifier
 			Resource timeInterval = ModelUtil.generateRandomResource(model);
 			model.addStatement(timeInterval, RDF.type,
 					smiy.pmkb.vocabulary.TIME.Interval);
-			model.addStatement(timeInterval, TL.durationInt, ModelUtil
-					.createLiteral(model, Integer.parseInt(lengthFB
-							.getFirstTextValue())));
+			ID3Util.addIntegerLiteral(model, timeInterval, TL.durationInt,
+					Integer.parseInt(lengthFB.getFirstTextValue()));
 			model.addStatement(resourceMap.get(ID3Util.SIGNAL), MO.time,
 					timeInterval);
 		}
@@ -555,22 +519,12 @@ public enum FrameIdentifier
 			Model model = result.getModel();
 			FrameBodyTOAL originalTitleFB = (FrameBodyTOAL) body;
 
-			// relate to "master signal"
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
-					.get(ID3Util.TRACK), MO.Signal);
-			ID3Util.checkStatementObject(model, resourceMap
-					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
-					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
-			ID3Util.checkStatementObject(model, resourceMap
-					.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
-					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
-					MO.MusicalManifestation);
+			ID3Util.prepareOriginalMusicalManifestation(model, resourceMap);
 
-			model.addStatement(resourceMap
+			ID3Util.addStringLiteral(model, resourceMap
 					.get(ID3Util.ORIGINALMUSICALMANIFESTATION), DC.title,
-					ModelUtil.createLiteral(model, originalTitleFB
-							.getFirstTextValue()));
+					originalTitleFB.getFirstTextValue());
+
 		}
 	},
 	TOFN("Original filename", true)
@@ -594,17 +548,7 @@ public enum FrameIdentifier
 			FrameBodyTOLY originalLyricistFB = (FrameBodyTOLY) body;
 			Model model = result.getModel();
 
-			// relate to "master signal"
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
-					.get(ID3Util.TRACK), MO.Signal);
-			ID3Util.checkStatementObject(model, resourceMap
-					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
-					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
-			ID3Util.checkStatementObject(model, resourceMap
-					.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
-					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
-					MO.MusicalManifestation);
+			ID3Util.prepareOriginalMusicalManifestation(model, resourceMap);
 			ID3Util.checkStatementObject(model, resourceMap
 					.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
 					MO.publication_of, resourceMap.get(ID3Util.ORIGINALLYRICS),
@@ -746,9 +690,9 @@ public enum FrameIdentifier
 
 			// FIXME: may surround this with some try and catch, to avoid null
 			// pointer exceptions
-			model.addStatement(resourceMap.get(ID3Util.MUSICALBUM),
-					MO.record_number, ModelUtil.createLiteral(model, positionFB
-							.getDiscNo().intValue()));
+			ID3Util.addIntegerLiteral(model, resourceMap
+					.get(ID3Util.MUSICALBUM), MO.record_number, positionFB
+					.getDiscNo().intValue());
 			ID3Util.checkCount(model, resourceMap.get(ID3Util.RELEASE),
 					MO.record_count, positionFB.getDiscTotal().intValue());
 		}
@@ -783,9 +727,8 @@ public enum FrameIdentifier
 
 			// FIXME: may surround this with some try and catch, to avoid null
 			// pointer exceptions
-			model.addStatement(resourceMap.get(ID3Util.TRACK), MO.track_number,
-					ModelUtil.createLiteral(model, trackNumberFB.getTrackNo()
-							.intValue()));
+			ID3Util.addIntegerLiteral(model, resourceMap.get(ID3Util.TRACK),
+					MO.track_number, trackNumberFB.getTrackNo().intValue());
 			ID3Util.checkCount(model, resourceMap.get(ID3Util.MUSICALBUM),
 					MO.track_count, trackNumberFB.getTrackTotal().intValue());
 		}
@@ -803,9 +746,8 @@ public enum FrameIdentifier
 			ID3Util.prepareServiceOutletConnection(model, resourceMap);
 
 			// add internet radion station name
-			model.addStatement(resourceMap.get(ID3Util.OUTLET), DC.title,
-					ModelUtil.createLiteral(model, internetRadioStationNameFB
-							.getFirstTextValue()));
+			ID3Util.addStringLiteral(model, resourceMap.get(ID3Util.OUTLET),
+					DC.title, internetRadioStationNameFB.getFirstTextValue());
 		}
 	},
 	TRSO("Internet radio station owner", true)
@@ -844,8 +786,9 @@ public enum FrameIdentifier
 					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
 					.get(ID3Util.TRACK), MO.Signal);
 
-			model.addStatement(resourceMap.get(ID3Util.MASTERSIGNAL), MO.isrc,
-					ModelUtil.createLiteral(model, isrcFB.getFirstTextValue()));
+			ID3Util.addStringLiteral(model, resourceMap
+					.get(ID3Util.MASTERSIGNAL), MO.isrc, isrcFB
+					.getFirstTextValue());
 		}
 	},
 	TSSE("Software/Hardware and settings used for encoding", false), // FIXME:
@@ -861,7 +804,6 @@ public enum FrameIdentifier
 				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTXXX txxx = (FrameBodyTXXX) body;
-			Model model = result.getModel();
 
 			String description = txxx.getDescription();
 			UserDefinedDescription userDefinedDescription = UserDefinedDescription
@@ -905,14 +847,9 @@ public enum FrameIdentifier
 			// a URL pointing at a webpage with information such as where the
 			// album can be bought
 			// FIXME: I used mo:paid_download for WPAY :\
-			Resource commercialInformation = model
-					.createURI(commercialInformationFB.getUrlLink());
-			model.addStatement(commercialInformation, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.TRACK));
-			model.addStatement(commercialInformation, RDF.type, BIBO.Document);
 			// if its not the homepage, then it is "just" a page
-			model.addStatement(resourceMap.get(ID3Util.TRACK), FOAF.page,
-					commercialInformation);
+			ID3Util.createPageLink(model, commercialInformationFB.getUrlLink(),
+					resourceMap.get(ID3Util.TRACK), FOAF.page);
 		}
 	},
 	WCOP("Copyright/Legal information", true)
@@ -942,11 +879,8 @@ public enum FrameIdentifier
 
 			// FIXME: a file (!) specific webpage? - currently track specific
 			// webpage
-			Resource fileSite = model.createURI(fileSiteFB.getUrlLink());
-			ID3Util.checkStatementSubject(model, fileSite, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.TRACK), BIBO.Document);
-			model.addStatement(resourceMap.get(ID3Util.TRACK), FOAF.homepage,
-					fileSite);
+			ID3Util.createPageLink(model, fileSiteFB.getUrlLink(), resourceMap
+					.get(ID3Util.TRACK), FOAF.homepage);
 		}
 	},
 	WOAR("Official artist/performer webpage", true)
@@ -964,12 +898,8 @@ public enum FrameIdentifier
 
 			// FIXME: how should I know, which artist webpage belongs to which
 			// artist? - currently I add these page to one (!) track artist :\
-			Resource artistSite = model.createURI(artistSiteFB.getUrlLink());
-			model.addStatement(resourceMap.get(ID3Util.TRACKARTIST),
-					FOAF.homepage, artistSite);
-			model.addStatement(artistSite, FOAF.primaryTopic, resourceMap
-					.get(ID3Util.TRACKARTIST));
-			model.addStatement(artistSite, RDF.type, BIBO.Document);
+			ID3Util.createPageLink(model, artistSiteFB.getUrlLink(),
+					resourceMap.get(ID3Util.TRACKARTIST), FOAF.homepage);
 		}
 	}, // very unspecific, because this frame can also exist multiple times, so
 	// how should one associate the correct artist to the correct webpage?
@@ -1005,7 +935,6 @@ public enum FrameIdentifier
 			// if its not the homepage, then it is "just" a page
 			model.addStatement(resourceMap.get(ID3Util.TRACK), FOAF.page,
 					sourceSite);
-
 		}
 	},
 	WORS("Official Internet radio station homepage", true)
@@ -1020,15 +949,9 @@ public enum FrameIdentifier
 			ID3Util.checkStream(model, result, resourceMap);
 			ID3Util.prepareServiceOutletConnection(model, resourceMap);
 
-			Resource internetRadioStationSite = model
-					.createURI(internetRadioStationSiteFB.getUrlLink());
-			model.addStatement(resourceMap.get(ID3Util.OUTLET), FOAF.homepage,
-					internetRadioStationSite);
-			model.addStatement(internetRadioStationSite, RDF.type,
-					BIBO.Document);
-			model.addStatement(internetRadioStationSite, FOAF.primaryTopic,
-					resourceMap.get(ID3Util.OUTLET));
-
+			ID3Util.createPageLink(model, internetRadioStationSiteFB
+					.getUrlLink(), resourceMap.get(ID3Util.OUTLET),
+					FOAF.homepage);
 		}
 	},
 	WPAY("Payment", true)
@@ -1060,13 +983,8 @@ public enum FrameIdentifier
 
 			ID3Util.preparePublisherConnection(model, resourceMap);
 
-			Resource publisherSite = model.createURI(publisherSiteFB
-					.getUrlLink());
-			model.addStatement(resourceMap.get(ID3Util.LABEL), FOAF.homepage,
-					publisherSite);
-			model.addStatement(publisherSite, RDF.type, BIBO.Document);
-			model.addStatement(publisherSite, FOAF.primaryTopic, resourceMap
-					.get(ID3Util.LABEL));
+			ID3Util.createPageLink(model, publisherSiteFB.getUrlLink(),
+					resourceMap.get(ID3Util.LABEL), FOAF.homepage);
 		}
 	},
 	WXXX("User defined URL link frame", false)
@@ -1076,7 +994,6 @@ public enum FrameIdentifier
 				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyWXXX wxxx = (FrameBodyWXXX) body;
-			Model model = result.getModel();
 
 			String description = wxxx.getDescription();
 			UserDefinedDescription userDefinedDescription = UserDefinedDescription
@@ -1119,10 +1036,9 @@ public enum FrameIdentifier
 			// a timestamp describing when the audio was encoded
 			Date encodingTime = ID3Util.id3v24timestampToDate(encodingTimeFB
 					.getFirstTextValue());
-			// FIXME: is Data date format == xsd data format?
-			model.addStatement(resourceMap.get(ID3Util.SIGNAL),
-					DCTERMS.created, ModelUtil.createLiteral(model,
-							encodingTime.toString(), XSD._date));
+
+			ID3Util.addDateLiteral(model, resourceMap.get(ID3Util.SIGNAL),
+					DCTERMS.created, encodingTime);
 		}
 	},
 	TDOR("Original release time", true)
@@ -1134,16 +1050,7 @@ public enum FrameIdentifier
 			FrameBodyTDOR originalReleaseTimeFB = (FrameBodyTDOR) body;
 			Model model = result.getModel();
 
-			// relate to "master signal"
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
-					.get(ID3Util.TRACK), MO.Signal);
-			ID3Util.checkStatementObject(model, resourceMap
-					.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
-					.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
-			ID3Util.checkStatementSubject(model, resourceMap
-					.get(ID3Util.ORIGINALRELEASEEVENT), EVENT.factor,
-					resourceMap.get(ID3Util.ORIGINALSIGNAL), MO.ReleaseEvent);
+			ID3Util.prepareOriginalReleaseEventConnection(model, resourceMap);
 
 			// a timestamp describing when the original recording of the audio
 			// was released - that's why original release event (?)
@@ -1200,7 +1107,6 @@ public enum FrameIdentifier
 
 			ID3Util.createTimeInstant(model, resourceMap.get(ID3Util.RELEASE),
 					releaseTime);
-			FrameBodyTIPL bla = (FrameBodyTIPL) body;
 		}
 	},
 	TDTG("Tagging time", false), // a timestamp describing then the audio was
@@ -1218,7 +1124,6 @@ public enum FrameIdentifier
 				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTIPL tipl = (FrameBodyTIPL) body;
-			Model model = result.getModel();
 
 			ValuePairs valuePairs = tipl.getPairing();
 			List<Pair> pairList = valuePairs.getMapping();
@@ -1226,11 +1131,18 @@ public enum FrameIdentifier
 			{
 				UserDefinedDescription userDefinedDescription = UserDefinedDescription
 						.getDescriptionByStringId(pair.getKey());
-				userDefinedDescription.process(result, resourceMap, pair.getValue());
+				userDefinedDescription.process(result, resourceMap, pair
+						.getValue());
 			}
 		}
 	},
-	TMCL("Musician credits list", false), // not supported by NID3
+	TMCL("Musician credits list", false), // one can get instruments of
+	// performers out of this frame
+	// somehow (Every odd field is an
+	// instrument and every even is an
+	// artist or a comma delimited list
+	// of artists); FIXME: currently not
+	// supported by PMKB
 	TMOO("Mood", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
@@ -1250,35 +1162,48 @@ public enum FrameIdentifier
 					.getFirstTextValue());
 		}
 	},
-	TPRO("Produced notice", false), // not supported by NID3
-	TSOA("Album sort order", false), // not supported by NID3
-	TSOP("Performer sort order", false), // not supported by NID3
-	TSOT("Title sort order", false), // not supported by NID3
-	TSST("Set subtitle", false), // not supported by NID3
+	TPRO("Produced notice", false), // the string must begin with a year ... is
+	// intended for the production copyright
+	// holder of the original sound; FIXME:
+	// currently not supported by PMKB
+	TSOA("Album sort order", false), // do we need this?; FIXME: currently not
+	// supported by PMKB
+	TSOP("Performer sort order", false), // do we need this?; FIXME: currently
+	// not supported by PMKB
+	TSOT("Title sort order", false), // do we need this?; FIXME currently not
+	// supported by PMKB
+	TSST("Set subtitle", false), // is intended for the subtitle of the part of
+	// a set this track belongs to (?); FIXME:
+	// currently not supported by PMKB
 
-	// these frames were present in ID3 v 2.3.0, but have been deprecated in
-	// 2.4.0 see: http://www.id3.org/id3v2.4.0-changes
+	// FIXME: these frames were present in ID3 v 2.3.0, but have been deprecated
+	// in
+	// 2.4.0 see: http://www.id3.org/id3v2.4.0-changes; maybe one still need
+	// these for legacy support
 
 	/** This frame is replaced by the EQU2 frame, 'Equalisation (2)' [F:4.12]. */
-	EQUA("Equalization", false), // not supported by NID3
+	EQUA("Equalization", false), // FIXME: currently not supported by PMKB
 	/**
 	 * This frame is replaced by the two frames TMCL, 'Musician credits list'
 	 * [F:4.2.2], and TIPL, 'Involved people list' [F:4.2.2].
 	 */
-	IPLS("Involved people list", false), // not supported by NID3
+	IPLS("Involved people list", false), // FIXME: currently not supported by
+	// PMKB
 	/**
 	 * This frame is replaced by the RVA2 frame, 'Relative volume adjustment
 	 * (2)' [F:4.11].
 	 */
-	RVAD("Relative volume adjustment", false), // not supported by NID3
+	RVAD("Relative volume adjustment", false), // FIXME: currently not supported
+	// by PMKB
 	/** This frame is replaced by the TDRC frame, 'Recording time' [F:4.2.5]. */
-	TDAT("Date", false)
+	TDAT("Date", true)
 	{
 		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
 			FrameBodyTDAT tdat = (FrameBodyTDAT) body;
+			Model model = result.getModel();
 			String text = tdat.getFirstTextValue();
 			// we only support well-formed dates
 			if (text.length() == 4)
@@ -1292,6 +1217,15 @@ public enum FrameIdentifier
 					String yearString = id3v2.getFirst(TYER.toString());
 					if (yearString.length() > 0)
 					{
+						// relate to "master signal"
+						ID3Util.checkStatementSubject(model, resourceMap
+								.get(ID3Util.MASTERSIGNAL), MO.published_as,
+								resourceMap.get(ID3Util.TRACK), MO.Signal);
+						ID3Util.checkStatementSubject(model, resourceMap
+								.get(ID3Util.RECORDING), MO.produced_signal,
+								resourceMap.get(ID3Util.MASTERSIGNAL),
+								MO.Recording);
+
 						int year = Integer.parseInt(yearString);
 						String time = id3v2.getFirst(TIME.toString());
 						if (time.length() > 0)
@@ -1300,13 +1234,21 @@ public enum FrameIdentifier
 							int minute = Integer.parseInt(text.substring(2, 4));
 							Calendar calendar = new GregorianCalendar(year,
 									month, day, hour, minute);
-							result.add(NID3.date, calendar.getTime());
+
+							ID3Util
+									.createTimeInstant(model, resourceMap
+											.get(ID3Util.RECORDING), calendar
+											.getTime());
 						}
 						else
 						{
 							Calendar calendar = new GregorianCalendar(year,
 									month, day);
-							result.add(NID3.date, calendar.getTime());
+
+							ID3Util
+									.createTimeInstant(model, resourceMap
+											.get(ID3Util.RECORDING), calendar
+											.getTime());
 						}
 					}
 				}
@@ -1320,9 +1262,7 @@ public enum FrameIdentifier
 		}
 	},
 	/** This frame is replaced by the TDRC frame, 'Recording time' [F:4.2.5]. */
-	TIME("Time", false), // this is covered by the TDAT frame, NID3 doesn't have
-	// any properties that would allow for simple xsd:time
-	// values to be stored
+	TIME("Time", false), // this is covered by the TDAT frame
 	/**
 	 * This frame is replaced by the TDOR frame, 'Original release time'
 	 * [F:4.2.5].
@@ -1333,30 +1273,31 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.originalReleaseYear, result.getModel()
-					.createDatatypeLiteral(
-							((FrameBodyTORY) body).getFirstTextValue(),
-							XSD._integer));
-		}
-	},
-	/** This frame is replaced by the TDRC frame, 'Recording time' [F:4.2.5]. */
-	TRDA("Recording dates", false)
-	{
-		public void process(AbstractTagFrameBody body, AbstractID3v2Tag id3v2,
-				HashMap<URI, String> id3v1props, RDFContainer result,
-				HashMap<String, Resource> resourceMap)
-		{
-			result.add(NID3.recordingDate, ((FrameBodyTRDA) body)
+			FrameBodyTORY originalReleaseYearFB = (FrameBodyTORY) body;
+			Model model = result.getModel();
+
+			ID3Util.prepareOriginalReleaseEventConnection(model, resourceMap);
+
+			ID3Util.createTimeInstantWithYear(model, resourceMap
+					.get(ID3Util.ORIGINALRELEASEEVENT), originalReleaseYearFB
 					.getFirstTextValue());
 		}
 	},
+	/** This frame is replaced by the TDRC frame, 'Recording time' [F:4.2.5]. */
+	TRDA("Recording dates", false), // is a intended to be used as complement to
+	// the "TYER", "TDAT" and "TIME" frames.
+	// E.g. "4th-7th June, 12th June" in
+	// combination with the "TYER" frame; needs
+	// a wrapper; FIXME: currently not supported
+	// by PMKB
 	/**
 	 * The information contained in this frame is in the general case either
 	 * trivial to calculate for the player or impossible for the tagger to
 	 * calculate. There is however no good use for such information. The frame
 	 * is therefore completely deprecated.
 	 */
-	TSIZ("Size", false), // not supported by NID3
+	TSIZ("Size", false), // do we need this?; FIXME: currently not supported by
+	// PMKB
 	/** This frame is replaced by the TDRC frame, 'Recording time' [F:4.2.5]. */
 	TYER("Year", true)
 	{
@@ -1364,10 +1305,15 @@ public enum FrameIdentifier
 				HashMap<URI, String> id3v1props, RDFContainer result,
 				HashMap<String, Resource> resourceMap)
 		{
-			result.add(NID3.recordingYear, result.getModel()
-					.createDatatypeLiteral(
-							((FrameBodyTYER) body).getFirstTextValue(),
-							XSD._integer));
+			FrameBodyTYER releaseYearFB = (FrameBodyTYER) body;
+			Model model = result.getModel();
+
+			ID3Util.prepareReleaseEventConnection(model, resourceMap);
+
+			ID3Util.createTimeInstantWithYear(model, resourceMap
+					.get(ID3Util.RELEASEEVENT), releaseYearFB
+					.getFirstTextValue());
+
 			id3v1props.remove(NID3.recordingYear);
 		}
 	},

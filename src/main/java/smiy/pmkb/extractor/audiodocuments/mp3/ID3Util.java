@@ -25,12 +25,19 @@ import org.ontoware.rdf2go.vocabulary.XSD;
 import org.semanticdesktop.aperture.rdf.RDFContainer;
 import org.semanticdesktop.aperture.rdf.util.ModelUtil;
 
+import smiy.pmkb.vocabulary.BIBO;
+import smiy.pmkb.vocabulary.CO;
+import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
 import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
+import smiy.pmkb.vocabulary.FRBR;
+import smiy.pmkb.vocabulary.IS;
 import smiy.pmkb.vocabulary.MO;
 import smiy.pmkb.vocabulary.MT;
+import smiy.pmkb.vocabulary.PBO;
 import smiy.pmkb.vocabulary.PO;
+import smiy.pmkb.vocabulary.TIME;
 import smiy.pmkb.vocabulary.TL;
 
 /**
@@ -156,6 +163,48 @@ public class ID3Util
 		}
 	}
 
+	public static void addIntegerLiteral(Model model, Resource subject,
+			URI predicate, int integerLiteral)
+	{
+		try
+		{
+			model.addStatement(subject, predicate, ModelUtil.createLiteral(
+					model, integerLiteral));
+		}
+		catch (ModelRuntimeException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ModelException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void addDateLiteral(Model model, Resource subject,
+			URI predicate, Date dateLiteral)
+	{
+		try
+		{
+			// FIXME: is Data date format == xsd data format? - no, it must be
+			// formatted (DateFormat ...)
+			model.addStatement(subject, predicate, ModelUtil.createLiteral(
+					model, dateLiteral.toString(), XSD._date));
+		}
+		catch (ModelRuntimeException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ModelException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public static void checkArtist(Model model, String value, Resource subject)
 	{
 		ID3Util
@@ -263,8 +312,7 @@ public class ID3Util
 			if (!model.contains(ModelUtil.createStatement(model, subject,
 					predicate, ModelUtil.createLiteral(model, count))))
 			{
-				model.addStatement(subject, predicate, ModelUtil.createLiteral(
-						model, count));
+				addIntegerLiteral(model, subject, predicate, count);
 			}
 		}
 		catch (ModelRuntimeException e)
@@ -390,33 +438,60 @@ public class ID3Util
 				.get(ID3Util.RELEASEEVENT), MO.label, resourceMap
 				.get(ID3Util.LABEL), MO.Label);
 	}
-	
+
 	public static void prepareReleaseEventConnection(Model model,
 			HashMap<String, Resource> resourceMap)
 	{
 		ID3Util.checkStatementSubject(model, resourceMap
 				.get(ID3Util.MUSICALBUM), MO.track, resourceMap
 				.get(ID3Util.TRACK), MO.Record);
-		ID3Util.checkStatementSubject(model, resourceMap
-				.get(ID3Util.RELEASE), MO.record, resourceMap
-				.get(ID3Util.MUSICALBUM), MO.Release);
+		ID3Util.checkStatementSubject(model, resourceMap.get(ID3Util.RELEASE),
+				MO.record, resourceMap.get(ID3Util.MUSICALBUM), MO.Release);
 		ID3Util.checkStatementSubject(model, resourceMap
 				.get(ID3Util.RELEASEEVENT), MO.release, resourceMap
 				.get(ID3Util.RELEASE), MO.ReleaseEvent);
 	}
-	
-	public static void createTimeInstant(Model model, Resource subject, Date time)
+
+	public static void createTimeInstant(Model model, Resource subject,
+			Date time)
 	{
 		// create time instant
-		Resource timeInstant = ModelUtil
-				.generateRandomResource(model);
+		Resource timeInstant = ModelUtil.generateRandomResource(model);
 		model.addStatement(subject, EVENT.time, timeInstant);
 		model.addStatement(timeInstant, RDF.type,
 				smiy.pmkb.vocabulary.TIME.Instant);
-		// FIXME: is Data date format == xsd data format?
+		addDateLiteral(model, timeInstant, TL.atDate, time);
+	}
+
+	public static void createPageLinkWithInfoService(Model model, String url,
+			Resource topic, URI infoService, URI pageRelation)
+	{
+		Resource site = createPageLink(model, url, topic, pageRelation);
+		model.addStatement(site, IS.info_service, infoService);
+	}
+
+	public static Resource createPageLink(Model model, String url,
+			Resource topic, URI pageRelation)
+	{
+		Resource site = model.createURI(url);
+		model.addStatement(site, FOAF.primaryTopic, topic);
+		model.addStatement(site, RDF.type, BIBO.Document);
+		model.addStatement(topic, pageRelation, site);
+
+		return site;
+	}
+
+	public static void createTimeInstantWithYear(Model model, Resource subject,
+			String year)
+	{
+		// create time instant
+		Resource releaseTime = ModelUtil.generateRandomResource(model);
+		model.addStatement(subject, EVENT.time, releaseTime);
+		model.addStatement(releaseTime, RDF.type, TIME.Instant);
 		try
 		{
-			model.addStatement(timeInstant, TL.atDate, ModelUtil.createLiteral(model, time.toString(), XSD._date));
+			model.addStatement(releaseTime, TL.atYear, ModelUtil.createLiteral(
+					model, year, XSD._gYear));
 		}
 		catch (ModelRuntimeException e)
 		{
@@ -428,5 +503,46 @@ public class ID3Util
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public static void prepareOriginalReleaseEventConnection(Model model,
+			HashMap<String, Resource> resourceMap)
+	{
+		// relate to "master signal"
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+				.get(ID3Util.TRACK), MO.Signal);
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
+				.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.ORIGINALRELEASEEVENT), EVENT.factor, resourceMap
+				.get(ID3Util.ORIGINALSIGNAL), MO.ReleaseEvent);
+	}
+
+	public static void prepareOriginalMusicalManifestation(Model model,
+			HashMap<String, Resource> resourceMap)
+	{
+		// relate to "master signal"
+		ID3Util.checkStatementSubject(model, resourceMap
+				.get(ID3Util.MASTERSIGNAL), MO.published_as, resourceMap
+				.get(ID3Util.TRACK), MO.Signal);
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.MASTERSIGNAL), MO.derived_from, resourceMap
+				.get(ID3Util.ORIGINALSIGNAL), MO.Signal);
+		ID3Util.checkStatementObject(model, resourceMap
+				.get(ID3Util.ORIGINALSIGNAL), FRBR.embodiment, resourceMap
+				.get(ID3Util.ORIGINALMUSICALMANIFESTATION),
+				MO.MusicalManifestation);
+	}
+
+	public static void createPlayCounter(Model model, int playCount,
+			String playCounterTitle, Resource mediaObject)
+	{
+		Resource playCounter = ModelUtil.generateRandomResource(model);
+		model.addStatement(playCounter, RDF.type, PBO.PlayBackCounter);
+		addIntegerLiteral(model, playCounter, CO.count, playCount);
+		addStringLiteral(model, playCounter, DC.title, "ID3 Play counter");
+		model.addStatement(playCounter, PBO.media_object, mediaObject);
 	}
 }

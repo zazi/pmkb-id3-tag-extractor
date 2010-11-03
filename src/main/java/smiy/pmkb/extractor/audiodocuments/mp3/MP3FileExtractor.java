@@ -22,6 +22,7 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.tag.TagField;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.AbstractTagFrameBody;
@@ -34,7 +35,6 @@ import org.ontoware.rdf2go.model.node.Resource;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.model.node.impl.URIImpl;
 import org.ontoware.rdf2go.vocabulary.RDF;
-import org.ontoware.rdf2go.vocabulary.XSD;
 import org.semanticdesktop.aperture.extractor.AbstractFileExtractor;
 import org.semanticdesktop.aperture.extractor.ExtractorException;
 import org.semanticdesktop.aperture.rdf.RDFContainer;
@@ -46,12 +46,9 @@ import org.slf4j.LoggerFactory;
 import smiy.pmkb.util.Namespaces;
 import smiy.pmkb.vocabulary.DC;
 import smiy.pmkb.vocabulary.DCTERMS;
-import smiy.pmkb.vocabulary.EVENT;
 import smiy.pmkb.vocabulary.FOAF;
 import smiy.pmkb.vocabulary.MFO;
 import smiy.pmkb.vocabulary.MO;
-import smiy.pmkb.vocabulary.TIME;
-import smiy.pmkb.vocabulary.TL;
 
 /**
  * A file extractor implementation for MP3 files.
@@ -265,23 +262,26 @@ public class MP3FileExtractor extends AbstractFileExtractor
 
 		AbstractID3v2Tag id3v2 = mp3File.getID3v2Tag();
 
-		Iterator iterator = id3v2.getFields();
+		Iterator<TagField> iterator = id3v2.getFields();
 		while (iterator.hasNext())
 		{
 			AbstractID3v2Frame frame = (AbstractID3v2Frame) iterator.next();
-			String identifier = frame.getIdentifier();
-			try
+			String identifier = frame.getId();
+			if (!frame.isEmpty())
 			{
-				FrameIdentifier frameIdentifier = FrameIdentifier
-						.valueOf(identifier.trim());
-				AbstractTagFrameBody body = frame.getBody();
-				frameIdentifier.process(body, id3v2, id3v1FieldHashMap, result,
-						resourceMap);
-			}
-			catch (Exception e)
-			{
-				logger.warn("Problem while getting the frame '" + identifier
-						+ "' from file " + id, e);
+				try
+				{
+					FrameIdentifier frameIdentifier = FrameIdentifier
+							.valueOf(identifier.trim());
+					AbstractTagFrameBody body = frame.getBody();
+					frameIdentifier.process(body, id3v2, id3v1FieldHashMap,
+							result, resourceMap);
+				}
+				catch (Exception e)
+				{
+					logger.warn("Problem while getting the frame '"
+							+ identifier + "' from file " + id, e);
+				}
 			}
 		}
 	}
@@ -340,40 +340,11 @@ public class MP3FileExtractor extends AbstractFileExtractor
 					int recordingYear = Integer.parseInt(value);
 					if ((recordingYear > 0))
 					{
-						ID3Util.checkStatementSubject(model, resourceMap
-								.get(ID3Util.MUSICALBUM), MO.track, resourceMap
-								.get(ID3Util.TRACK), MO.Record);
-						ID3Util.checkStatementSubject(model, resourceMap
-								.get(ID3Util.RELEASE), MO.record, resourceMap
-								.get(ID3Util.MUSICALBUM), MO.Release);
-						ID3Util.checkStatementSubject(model, resourceMap
-								.get(ID3Util.RELEASEEVENT), MO.release,
-								resourceMap.get(ID3Util.RELEASE),
-								MO.ReleaseEvent);
+						ID3Util.prepareReleaseEventConnection(model,
+								resourceMap);
 
-						// create time instant
-						Resource releaseTime = ModelUtil
-								.generateRandomResource(model);
-						model.addStatement(resourceMap
-								.get(ID3Util.RELEASEEVENT), EVENT.time,
-								releaseTime);
-						model.addStatement(releaseTime, RDF.type, TIME.Instant);
-						try
-						{
-							model.addStatement(releaseTime, TL.atYear,
-									ModelUtil.createLiteral(model, value,
-											XSD._gYear));
-						}
-						catch (ModelRuntimeException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						catch (ModelException e)
-						{
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						ID3Util.createTimeInstantWithYear(model, resourceMap
+								.get(ID3Util.RELEASEEVENT), value);
 					}
 				}
 				catch (NumberFormatException nfe)
