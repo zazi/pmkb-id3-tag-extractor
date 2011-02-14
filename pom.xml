@@ -9,7 +9,7 @@
 
   <name>pmkb</name>
   <description>A personal music knowledge base</description>
-  <url>http://smiy.wordpress.com</url>
+  <url>http://smiy.org</url>
 
   <dependencyManagement>
   	<dependencies>
