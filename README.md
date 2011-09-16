@@ -4,7 +4,7 @@ PMKB ID3 Tag Extractor
 About
 -----
 
-This is the Personal Music Knowledge Base (PMKB) [ID3 Tag](http://id3.org/) extractor. This [RDFizer](http://www.w3.org/wiki/ConverterToRdf) is a fork of the [MP3 File Extractor](http://aperture.svn.sourceforge.net/viewvc/aperture/aperture/trunk/core/src/main/java/org/semanticdesktop/aperture/extractor/mp3/) of the [Aperture](http://aperture.sourceforge.net/) Semantic Web framework. It makes use of the [RDF2Go](http://semanticweb.org/wiki/RDF2Go) framework as a triple-centric API.
+This is the [Personal Music Knowledge Base](http://smiy.org/2011/07/17/semantic-federation-of-music-and-music-related-information-for-establishing-a-personal-music-knowledge-base/) (PMKB) [ID3 Tag](http://id3.org/) extractor. This [RDFizer](http://www.w3.org/wiki/ConverterToRdf) is a fork of the [MP3 File Extractor](http://aperture.svn.sourceforge.net/viewvc/aperture/aperture/trunk/core/src/main/java/org/semanticdesktop/aperture/extractor/mp3/) of the [Aperture](http://aperture.sourceforge.net/) Semantic Web framework. It makes use of the [RDF2Go](http://semanticweb.org/wiki/RDF2Go) framework as a triple-centric API.
 
 Usage
 -----
